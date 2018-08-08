@@ -23,7 +23,10 @@ PULP_CFLAGS += -mno-memcpy -fno-tree-loop-distribute-patterns -fdata-sections -f
 PULP_CFLAGS += -I$(TILER_PATH)/StdTypes/
 PULP_LDFLAGS +=  -flto -Wl,--gc-sections
 
-all:: model
+imgOut:
+	mkdir $@
+
+all:: model imgOut
 
 # Build the code generator
 GenTile:
@@ -37,6 +40,7 @@ model: $(MODEL_GEN_C)
 
 clean::
 	$(RM) GenTile $(MODEL_GEN_CLEAN)
+	rm -rf imgOut
 
 .PHONY: model clean
 
