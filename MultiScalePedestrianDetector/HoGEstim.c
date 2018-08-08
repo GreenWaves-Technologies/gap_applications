@@ -67,7 +67,7 @@ typedef struct CropArgCluster {
 	unsigned int H;
 	unsigned int crop_w;
 	unsigned int crop_h;
-	
+
 } CropArgCluster_T;
 
 static void cam_param_conf(rt_cam_conf_t *_conf){
@@ -317,18 +317,18 @@ void crop_cluster(CropArgCluster_T *ArgC){
 	unsigned int crop_w = ArgC->crop_w;
 	unsigned int crop_h_half = (ArgC->crop_h)/2;
 	unsigned int crop_w_half = (ArgC->crop_w)/2;
-	
+
   	unsigned int CoreId = rt_core_id();
   	unsigned int ChunkCell = ChunkSize(width);
   	unsigned int First = CoreId*ChunkCell, Last  = Min(width, First+ChunkCell);
-  	
+
   	for(unsigned int i=0;i<height;i++){
 		for(unsigned int j=First;j<Last;j++){
   			out[i*width+j] = in[(i+crop_h_half)*(width+crop_w)+j+crop_w_half];
   		}
-  		rt_team_barrier(); //we need to be sure a line is finished before starting the new one. 
+  		rt_team_barrier(); //we need to be sure a line is finished before starting the new one.
   	}
-  	
+
 }
 
 L2_MEM CropArgCluster_T arg;
@@ -351,7 +351,7 @@ void crop_image(unsigned char* in,unsigned char* out,unsigned int W,unsigned int
 
 }
 
-	
+
 void gray8_to_RGB565_cluster_half(ArgCluster_T *ArgC){
 
   	unsigned int width = ArgC->W;
@@ -379,15 +379,15 @@ void cluster_main(ArgCluster_T* arg){
 
 		gap8_resethwtimer();
 		#if FROM_FILE
-	
+
 		#if VERBOSE
 			ReportHoGConfiguration();
 		#endif
-	
+
 		#else
 			crop_image (ImageIn, ImageIn, W, H,2,2);
 		#endif
-		
+
 
 		ProcessOneLevel( 0, ImageIn, ImageIn,  W, H, W-0*W/HOG_ESTIM_SCALE_FACTOR, H-0*H/HOG_ESTIM_SCALE_FACTOR, KER_GR_ARGS_MyHOG_1,                   0, KER_GR_ARGS_MyWeakHOGEstim_1);
 		ProcessOneLevel(-1, ImageIn, ImageIn1, W, H, W-1*W/HOG_ESTIM_SCALE_FACTOR, H-1*H/HOG_ESTIM_SCALE_FACTOR, KER_GR_ARGS_MyHOG_2, KER_ARGS_MyResize_1, KER_GR_ARGS_MyWeakHOGEstim_2);
@@ -396,7 +396,7 @@ void cluster_main(ArgCluster_T* arg){
 
 		ProcessOneLevel(+1, ImageIn, ImageIn1, W, H, W+1*W/HOG_ESTIM_SCALE_FACTOR, H+1*H/HOG_ESTIM_SCALE_FACTOR, KER_GR_ARGS_MyHOG_5, KER_ARGS_MyResize_4, KER_GR_ARGS_MyWeakHOGEstim_5);
 		ProcessOneLevel(+2, ImageIn, ImageIn1, W, H, W+2*W/HOG_ESTIM_SCALE_FACTOR, H+2*H/HOG_ESTIM_SCALE_FACTOR, KER_GR_ARGS_MyHOG_6, KER_ARGS_MyResize_5, KER_GR_ARGS_MyWeakHOGEstim_6);
-		
+
 		RemoveNonMaxBB();
 
 		#if FROM_FILE
@@ -419,13 +419,13 @@ int main()
 	char *Imagefile = "img_OUT5.pgm";
 	char imageName[64];
 	sprintf(imageName, "../../../testImages/GWT_dataset/%s", Imagefile);
-	
+
 	ArgCluster_T clusterArg;
-	
+
 	unsigned int MaxUpScale = 2;
 	unsigned int W_real = 324, H_real = 244;
 	unsigned int W = 322, H = 242;
-	
+
 	unsigned int MaxW = (W) + MaxUpScale*(W)/HOG_ESTIM_SCALE_FACTOR;
 	unsigned int MaxH = (H) + MaxUpScale*(H)/HOG_ESTIM_SCALE_FACTOR;
 	unsigned int MaxW_real = (W_real) + MaxUpScale*(W_real)/HOG_ESTIM_SCALE_FACTOR;
@@ -449,12 +449,12 @@ int main()
 	if (rt_event_alloc(NULL, 8)) return -1;
 	//Setting FC to 250MhZ
 	rt_freq_set(RT_FREQ_DOMAIN_FC, 250000000);
-	
+
 	image16 	= (unsigned short *) rt_alloc(RT_ALLOC_L2_CL_DATA, (322/2)*(242/2)*sizeof(unsigned short));
 	ImageIn     = (unsigned char *)  rt_alloc(RT_ALLOC_L2_CL_DATA,ImgSize_real);
 	HoGFeatures = (unsigned short *) rt_alloc(RT_ALLOC_L2_CL_DATA,HOGFeatSize);
 	ImageIn1    = (unsigned char *)  rt_alloc(RT_ALLOC_L2_CL_DATA,ImgSize);
-    
+
 
 	if (ImageIn==0 || HoGFeatures==0 || ImageIn1==0) {
 		printf("Failed to allocate Memory for Image (%d bytes) or HoGFeatures (%d bytes) or Image clone (%d bytes)\n",
@@ -478,26 +478,28 @@ int main()
 	}
 
 #else
-	
+
 
 	//Init SPI and ili9341 LCD screen
 	rt_spim_t *spim = init_spi_lcd();
 	ILI9341_begin(spim);
 	setRotation(spim,2);
-	
+
 	cam_param_conf(&cam1_conf);
 	camera1 = rt_camera_open("camera", &cam1_conf, 0);
 	if (camera1 == NULL) return -1;
-	
-	rt_cam_control(camera1, CMD_START, 0);
+
+    //Init Camera Interface
+    rt_cam_control(camera1, CMD_INIT, 0);
+    rt_time_wait_us(1000000); //Wait camera calibration
 
 #endif
 
 	rt_cluster_mount(MOUNT, CID, 0, NULL);
 	//Setting Cluster freq to 175MHz
 	rt_freq_set(RT_FREQ_DOMAIN_FC, 175000000);
-	
-	if (AllocateBBList(HOG_ESTIM_MAX_BB)) 
+
+	if (AllocateBBList(HOG_ESTIM_MAX_BB))
 	{
 		printf("Failed to allocate BB List\n"); return 1;
 	}
@@ -522,7 +524,7 @@ int main()
 
 	#if !FROM_FILE
 	//Configuring Camera Registers
-	himaxRegWrite(camera1,0x1003, 0x00);             //  Black level target    
+	himaxRegWrite(camera1,0x1003, 0x00);             //  Black level target
 
     himaxRegWrite(camera1,AE_TARGET_MEAN, 0xAC);      //AE target mean [Def: 0x3C]
     himaxRegWrite(camera1,AE_MIN_MEAN,    0x0A);      //AE min target mean [Def: 0x0A]
@@ -532,18 +534,20 @@ int main()
     himaxRegWrite(camera1,DAMPING_FACTOR, 0x20);      //Damping Factor [Def: 0x20]
     himaxRegWrite(camera1,DIGITAL_GAIN_H, 0x01);      //Digital Gain High [Def: 0x01]
     himaxRegWrite(camera1,DIGITAL_GAIN_L, 0x00);      //Digital Gain Low [Def: 0x00]
-	_himaxMode(camera1, HIMAX_Streaming);
-	plpUdmaCamCustom_u _cpi;
-	_cpi.raw = hal_cpi_glob_read(0);
+
 	while(1){
-		_cpi.cfg_glob.enable = ENABLE;
-   		 hal_cpi_glob_set(0, _cpi.raw);
-		rt_event_t *event_0 = rt_event_get_blocking(NULL);
-		rt_camera_capture (camera1, ImageIn, W_real*H_real, event_0);
-		rt_event_wait(event_0);
-		
-		_cpi.cfg_glob.enable = DISABLE;
-  		hal_cpi_glob_set(0, _cpi.raw);
+        //Enable Camera Interface
+        rt_cam_control(camera1, CMD_START, 0);
+        // Get an event from the free list, which can then be used for a blocking wait using rt_event_wait.
+        rt_event_t *event_0 = rt_event_get_blocking(NULL);
+        // Programme the camera capture job to udma
+        rt_camera_capture (camera1, ImageIn, W_real*H_real, event_0);
+        // Start to receive the frame.
+        // Wait until the capture finished
+        rt_event_wait(event_0);
+        // Stop the camera, camera interface is clock gated.
+        rt_cam_control(camera1, CMD_PAUSE, 0);
+
 	#endif
   		gap8WriteGPIO(gap8GiveGpioNb(PLP_PAD_TIMER0_CH0), 0x1);
 		rt_cluster_call(NULL, CID, (void (*)(void *))  cluster_main, &clusterArg, stacks, STACK_SIZE, STACK_SIZE, rt_nb_pe(), NULL);
@@ -553,12 +557,12 @@ int main()
 		//Send image to ili9341 LCD
 		lcd_pushPixels(spim, LCD_OFF_X, LCD_OFF_Y, W/2,H/2, image16);
 	}
-	
+
 	#else
 	#if SAVE_IMAGE
 		sprintf(imageName, "../../../%s", Imagefile);
     	printf("imgName: %s\n", imageName);
-    	WriteImageToFile(imageName,W,H,(ImageIn));	
+    	WriteImageToFile(imageName,W,H,(ImageIn));
 	#endif
 	#endif
 
