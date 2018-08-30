@@ -33,7 +33,7 @@ PULP_APP = main
 PULP_APP_SRCS =   main.c  ./libs/MFCC.c ./libs/MFCC_Dump.c ./CnnKernels_hwce.c CNN_kernels/CnnKernels.c  ./CNN_kernels/CnnKernels_tileddense.c  ./CnnKernelsInit_hwce.c ./libs/CNN_BasicKernels.c ./libs/CNN_HwCE.c ./libs/Cluster_FLL_optimal_settings.c
 
 #To activate Hardware CE SET -DRT_HAS_HWCE=1
-#USE_HARDWARE_CE = -DRT_HAS_HWCE=1
+USE_HARDWARE_CE = -DRT_HAS_HWCE=1
 
 PULP_CFLAGS += -O3 $(USE_HARDWARE_CE)
 

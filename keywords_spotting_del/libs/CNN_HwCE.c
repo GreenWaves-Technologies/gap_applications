@@ -287,56 +287,31 @@ static void HWCE_TileInit_FirstStripe_SingleOut(short int *In, short int *Out,
 	HwCE_Set_JobConfig1(HWCE_ONE_OUT);
 }
 
-static void HWCE_TileInit_FirstStripe_8x20(short int *In, short int *Out,
+static void HWCE_TileInit_FirstStripe_NxM(short int *In, short int *Out,
 					       unsigned int W, unsigned int H, short int *Filter, short int Bias,
-			                       unsigned int StripeW, unsigned int FDimM1)
+					   unsigned int StripeW, unsigned int FDimM1,unsigned int Wo)
 
 {
 	unsigned int JobId = HwCE_Acquire_Job();
 	/* Configure Input, One vertical stripe, width=HwCE_W, Height=H */
-	HwCE_SetInTransfer_Size((98-15), 32);
-	HwCE_SetInLine_StrideAndLength(40, 32);
-	HwCE_SetInFeature_StrideAndLength(40, 98-15);
+	HwCE_SetInTransfer_Size(H, StripeW);
+	HwCE_SetInLine_StrideAndLength(W, StripeW);
+	HwCE_SetInFeature_StrideAndLength(W, H);
 	HwCE_SetIn_Address((unsigned int) In);
 
 	/* Filter coefficients */
 	HwCE_SetCoeff_Address((unsigned int) Filter);
 
 	/* Configure Output, One vertical stripe, width=StripeW-2*K, Height=H-2*K */
-	HwCE_SetOutTransfer_Size((98-20+1), 32-4);//<=========
-	HwCE_SetOutLine_StrideAndLength(32, 32-4);//<==========
-	HwCE_SetOutFeature_StrideAndLength(32, 98-20+1);
+	HwCE_SetOutTransfer_Size(H-FDimM1, StripeW-FDimM1);//<=========
+	HwCE_SetOutLine_StrideAndLength(Wo, StripeW-FDimM1);//<==========
+	HwCE_SetOutFeature_StrideAndLength(Wo, H-FDimM1);
 	HwCE_SetOut_Address(HWCE_OUT0, (unsigned int) Out);
 
 	HwCE_Set_JobConfig0(StripeW, Bias);
 	HwCE_Set_JobConfig1(HWCE_ONE_OUT);
 }
 
-static void HWCE_TileInit_FirstStripe_4x10(short int *In, short int *Out,
-					       unsigned int W, unsigned int H, short int *Filter, short int Bias,
-			                       unsigned int StripeW, unsigned int FDimM1)
-
-{
-	unsigned int JobId = HwCE_Acquire_Job();
-
-	/* Configure Input, One vertical stripe, width=HwCE_W, Height=H */
-	HwCE_SetInTransfer_Size((39-5), (StripeW));
-	HwCE_SetInLine_StrideAndLength(16, StripeW);
-	HwCE_SetInFeature_StrideAndLength(16, 39-5);
-	HwCE_SetIn_Address((unsigned int) In);
-
-	/* Filter coefficients */
-	HwCE_SetCoeff_Address((unsigned int) Filter);
-
-	/* Configure Output, One vertical stripe, width=StripeW-2*K, Height=H-2*K */
-	HwCE_SetOutTransfer_Size((39-10+1), (StripeW-FDimM1));//<=========
-	HwCE_SetOutLine_StrideAndLength(14, (StripeW-FDimM1));//<==========
-	HwCE_SetOutFeature_StrideAndLength(14, 39-10+1);
-	HwCE_SetOut_Address(HWCE_OUT0, (unsigned int) Out);
-
-	HwCE_Set_JobConfig0(StripeW, Bias);
-	HwCE_Set_JobConfig1(HWCE_ONE_OUT);
-}
 
 static void HWCE_TileInit_MultiOut(short int *In, short int *Out0, short int *Out1, short int *Out2, unsigned int W, unsigned int H,
 			           unsigned int StripeW, unsigned int FDimM1, unsigned int Fix3x3, unsigned ReconfigureStripe)
@@ -361,48 +336,7 @@ static void HWCE_TileInit_MultiOut(short int *In, short int *Out0, short int *Ou
 	}
 }
 
-static void HWCE_TileInit_8x20(short int *In, short int *Out, unsigned int W, unsigned int H,
-			            unsigned int StripeW, unsigned int FDimM1,
-				    unsigned ReconfigureStripe)
 
-{
-	unsigned int JobId = HwCE_Acquire_Job();
-
-	/* Configure Input and Output buffers */
-	HwCE_SetIn_Address((unsigned int) In);
-	HwCE_SetOut_Address(HWCE_OUT0, (unsigned int) Out);
-
-	if (ReconfigureStripe) {
-	  /* Reconfigure Tile related parameters logh*/
-		HwCE_SetInTransfer_Size((H), (StripeW));
-		HwCE_SetInLine_Length(StripeW);
-
-		HwCE_SetOutTransfer_Size((98-20+1), (StripeW-5+1));
-		HwCE_SetOutLine_Length((StripeW-5+1));
-		HwCE_Set_JobConfig0_BufLen(StripeW);
-	}
-}
-static void HWCE_TileInit_4x10(short int *In, short int *Out, unsigned int W, unsigned int H,
-			            unsigned int StripeW, unsigned int FDimM1,
-				    unsigned ReconfigureStripe)
-
-{
-	unsigned int JobId = HwCE_Acquire_Job();
-
-	/* Configure Input and Output buffers */
-	HwCE_SetIn_Address((unsigned int) In);
-	HwCE_SetOut_Address(HWCE_OUT0, (unsigned int) Out);
-
-	if (ReconfigureStripe) {
-		/* Reconfigure Tile related parameters */
-		HwCE_SetInTransfer_Size((H), (StripeW));
-		HwCE_SetInLine_Length(StripeW);
-
-		HwCE_SetOutTransfer_Size((39-10+1), (StripeW-4));
-		HwCE_SetOutLine_Length((StripeW-4));
-		HwCE_Set_JobConfig0_BufLen(StripeW);
-	}
-}
 
 static void HWCE_TileInit_SingleOut(short int *In, short int *Out, unsigned int W, unsigned int H,
 			            unsigned int StripeW, unsigned int FDimM1,
@@ -513,7 +447,7 @@ void HWCE_ProcessOneTile5x5(short int *In, short int *Out, short int *Filter, sh
 }
 
 // 8x20 filter ==> 2 stripes
-void HWCE_2stripes_5x5(short int *In, short int *Out, short int *Filter, short int Bias, unsigned int W, unsigned int H, unsigned char pass_nb)
+void HWCE_2stripes_5x5(short int *In, short int *Out, short int *Filter, short int Bias, unsigned int W, unsigned int H, unsigned char pass_nb, unsigned int Wo)
 
 {
 #define Min(x, y) (((x)<(y))?(x):(y))
@@ -525,7 +459,7 @@ void HWCE_2stripes_5x5(short int *In, short int *Out, short int *Filter, short i
 	
 	// first stripe
 	StripeW = HWCE_LBSIZE;
-	HWCE_TileInit_FirstStripe_8x20(In, Out, W, H-15, Filter, Bias, StripeW, FDimM1);
+	HWCE_TileInit_FirstStripe_NxM(In, Out, W, H-15, Filter, Bias, StripeW, FDimM1, Wo);
 
 	/* Process current stripe */
 	HwCE_Trigger_Job();	
@@ -554,7 +488,7 @@ void HWCE_2stripes_5x5(short int *In, short int *Out, short int *Filter, short i
 	else
 	  StripeW= 7+1 ;
 	  
-	HWCE_TileInit_8x20(In, Out, W, H-15, StripeW, FDimM1, (StripeW != HWCE_LBSIZE));
+	HWCE_TileInit_SingleOut(In, Out, W, H-15, StripeW, FDimM1, (StripeW != HWCE_LBSIZE));
 	// second stripe
 	HwCE_Trigger_Job();
 	HwCE_Wait_JobDone();
@@ -569,7 +503,7 @@ void HWCE_2stripes_5x5(short int *In, short int *Out, short int *Filter, short i
 }
 // 6x10 filter => 1 stripe
 
-void HWCE_2stripes_5x5_4x10(short int *In, short int *Out, short int *Filter, short int Bias, unsigned int W, unsigned int H)
+void HWCE_2stripes_5x5_4x10(short int *In, short int *Out, short int *Filter, short int Bias, unsigned int W, unsigned int H, unsigned int Wo)
 {
 #define Min(x, y) (((x)<(y))?(x):(y))
 	int FDimM1 = 4;
@@ -579,17 +513,9 @@ void HWCE_2stripes_5x5_4x10(short int *In, short int *Out, short int *Filter, sh
 	// first stripe
 	StripeW = 10 ;
 
-	//printf("W %d H %d StripeW %d \n",W,H,StripeW);
 
-	if (0) {
-	  printf("input 4x10\n");
-	  for (i=0;i<H;i++)
-	    for (j=0;j<16;j++) printf("hwce in %d %d %x\n",j,i,In[j+16*i]);
-	  for (i=0;i<2;i++)
-	    for (j=0;j<26;j++) printf("hwce coef %d %d %x\n",i,j,Filter[j+26*i]); 
-	}
 	
-	HWCE_TileInit_FirstStripe_4x10(In, Out, W, H-5, Filter, Bias, StripeW, FDimM1 );
+	HWCE_TileInit_FirstStripe_NxM(In, Out, W, H-5, Filter, Bias, StripeW, FDimM1,Wo );
 	//printf("conf done\n");
 
 	/* Process current stripe */
@@ -606,7 +532,7 @@ void HWCE_2stripes_5x5_4x10(short int *In, short int *Out, short int *Filter, sh
 	In += StripeW - FDimM1; Out +=  StripeW - FDimM1;
 	StripeW = (17-10+4+1);
 	
-	HWCE_TileInit_4x10(In, Out, W, H-5, StripeW, FDimM1, (StripeW != HWCE_LBSIZE));
+	HWCE_TileInit_SingleOut(In, Out, W, H-5, StripeW, FDimM1, (StripeW != HWCE_LBSIZE));
 
 	/* process 2nd stripe */
 	HwCE_Trigger_Job();
@@ -652,7 +578,7 @@ void __attribute__ ((noinline)) HWCE_ProcessOneTile8x20(short int *In, short int
 #ifdef PRINTDEB_TILE
 	  printf("1st pass tile %d\n",tile);
 #endif
-	  HWCE_2stripes_5x5(In + 5*tile*W , Out , Filter + tile*26 , Bias, W, H , 1);
+	  HWCE_2stripes_5x5(In + 5*tile*W , Out , Filter + tile*26 , Bias, W, H , 1, 32);
 	  if (tile==0) HwCE_SetYinMode(
 			  (unsigned int) (0)
 			  );
@@ -666,7 +592,7 @@ void __attribute__ ((noinline)) HWCE_ProcessOneTile8x20(short int *In, short int
 	  tile5 = 5 + 40*5*tile;
 
 	  // stripe loop (Bias ?)
-	  HWCE_2stripes_5x5(In + tile5 , Out , Filter + 4*26 + tile*26 , Bias, W, H , 2);
+	  HWCE_2stripes_5x5(In + tile5 , Out , Filter + 4*26 + tile*26 , Bias, W, H , 2, 32);
 
 	      
 	}
@@ -700,7 +626,7 @@ void __attribute__ ((noinline)) HWCE_ProcessOneTile4x10(short int *In, short int
 	int i,j;
 	for (tile=0;tile<2;tile++){
 	  // compute partial pixel with filter number "tile" in pass 1 
-	  HWCE_2stripes_5x5_4x10(In + 5*tile*W , Out , Filter + tile*26 , Bias, W, H);
+	  HWCE_2stripes_5x5_4x10(In + 5*tile*W , Out , Filter + tile*26 , Bias, W, H, 14);
 	  // set HWCE in accumulation mode after first tile
 	  if (tile==0) HwCE_SetYinMode(	(unsigned int) (0));
 	}

@@ -31,8 +31,10 @@
 
 // fractional definition for log
 #define QN 24
-#define gaplog2  ((int) floor(log(2)*(float)(1<<QN)+0.5))
-
+//#define gaplog2  ((int) floor(log(2)*(float)(1<<QN)+0.5))
+#define GAPLOG2                                (0xb17218)
+//#define NORMDCT                                ((short int) floor(1.0/sqrt(2)*(1<<15) + 0.5))
+#define NORMDCT                                (0x5a82)
 
 typedef struct {
         short int Start;

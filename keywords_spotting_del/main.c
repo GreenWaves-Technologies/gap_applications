@@ -109,14 +109,16 @@ int finished = 0;
 
 
 // buffers for MFCC feature
-v2s  W_Frame[N_FFT+4];
-short int Frame[FRAME];
+//RT_FC_DATA v2s  W_Frame[N_FFT+4];
+//RT_FC_DATA short int Frame[FRAME];
+RT_FC_DATA v2s  *W_Frame;
+RT_FC_DATA short int *Frame;
 short int FEAT_LIST[N_FRAME*NUMCEP];
 short int *InSignal = DataIn;
 short int *pfeat_list;
 
 // sqrt(2) to normalize dct 
-#define NORMDCT  ((short int) floor(1.0/sqrt(2)*(1<<15)))		
+//#define NORMDCT  ((short int) floor(1.0/sqrt(2)*(1<<15)))		
 
 
 #define CHECKSUM 52259
@@ -418,7 +420,7 @@ void compute_mfcc( ) {
 		printf("energy00 = %f %x log = %f\n",energy/(float)(1<<(14+9+2*shift)),energy,(log(energy/(float)(1<<(14+9+2*shift)))));
 #endif
 
-		energy = logfp(energy>>(2*shift)) + (QN-14-9)*gaplog2;
+		energy = logfp(energy>>(2*shift)) + (QN-14-9)*GAPLOG2;
 
 		unsigned int * MFCC_BASE = (unsigned int*) FramePower;
 		ComputeMFCC_int(FramePower, MFCC_BASE);
@@ -441,7 +443,7 @@ void compute_mfcc( ) {
 		Compute_log(MFCC_BASE);
 
 		for (j=0;j<MFCC_BANK_CNT;j++) {
-		  MFCC_BASE[j] -= 2*shift*gaplog2;
+		  MFCC_BASE[j] -= 2*shift*GAPLOG2;
 		}
 		
 #ifdef PRINTDEB
@@ -554,6 +556,9 @@ int main()
  if (perf == NULL) return -1;
 
  //======================MFCC
+
+ Frame = rt_alloc(RT_ALLOC_FC_DATA,FRAME*sizeof(short int));
+ W_Frame = rt_alloc(RT_ALLOC_FC_DATA,(N_FFT+4)*sizeof(v2s));
  
 #ifdef DOMFCC 
  rt_perf_init(perf);
@@ -564,7 +569,7 @@ int main()
  rt_perf_save(perf);
  rt_perf_stop(perf);
  printf("MFCC done, features generated.\n\n\n");
- //printf("\n\n ============> cycles %d\n\n",rt_perf_get(perf, RT_PERF_CYCLES));
+ printf("\n\n ============> cycles %d\n\n",rt_perf_get(perf, RT_PERF_CYCLES));
  pfeat_list = (short int*) &(FEAT_LIST[0]);
 #ifdef PRINTFEAT
  printf("dump features %d\n",NUMCEP*N_FRAME);

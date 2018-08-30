@@ -55,9 +55,11 @@ struct complex_f{
 
 //#define QN 24
 //#define log2  ((int) floor(log(2)*(float)(1<<QN)+0.5))
-#define c1_3   ((int) floor((1.0/3.0) * (float)(1<<QN) +0.5))
+//#define c1_3   ((int) floor((1.0/3.0) * (float)(1<<QN) +0.5))
+#define c1_3 (0xd6)
 // normalisation factor in (32-QN).QN
-#define  LOG_NORM  ((int) floor(log((float)N_FFT)*(float)(1<<QN)+0.5))
+//#define  LOG_NORM  ((int) floor(log((float)N_FFT)*(float)(1<<QN)+0.5))
+#define LOG_NORM    (0x400) 
 
  int logfp(unsigned int a) {
 
@@ -87,7 +89,7 @@ struct complex_f{
   int ar3 = (ar2 * ar) >> (QN-1);
   //printf("ar %x ar2 %x ar3 %x\n",ar,ar2,ar3);
   ar3 = (ar3 * c1_3) >> QN;
-  int loga =  ((((valint)*gaplog2)) - ar - ar2 - ar3 ) ;
+  int loga =  ((((valint)*GAPLOG2)) - ar - ar2 - ar3 ) ;
   //printf("loga %x\n", ((valint<<QN)*log2)>>QN);
 
 #ifdef PRINTDEB_FLOAT
