@@ -25,19 +25,19 @@ static inline unsigned int __attribute__((always_inline)) ChunkSize(unsigned int
 void KerReadHoGFeatCol(KerReadHoGFeatCol_ArgT *Arg)
 
 {
-	Wordu16 * __restrict__ In = Arg->In;
-	Wordu32 H = Arg->H;
-	Wordu32 FeatureSize = Arg->FeatureSize;
-	Wordu32 EstimWidth = Arg->EstimWidth;
-	Wordu16 ** __restrict__ HoGFeatCols = Arg->HoGFeatCols;
-	Wordu32 HoGFeatColIndex = Arg->HoGFeatColIndex;
+	uint16_t * __restrict__ In = Arg->In;
+	uint32_t H = Arg->H;
+	uint32_t FeatureSize = Arg->FeatureSize;
+	uint32_t EstimWidth = Arg->EstimWidth;
+	uint16_t ** __restrict__ HoGFeatCols = Arg->HoGFeatCols;
+	uint32_t HoGFeatColIndex = Arg->HoGFeatColIndex;
 
     unsigned int CoreId = gap8_coreid();
     unsigned int ChunkCell = ChunkSize(H*FeatureSize);
 	unsigned int First = CoreId*ChunkCell, Last  = Min(H*FeatureSize, First+ChunkCell);
 
 	unsigned int i;
-	Wordu16 *FeatCol;
+	uint16_t *FeatCol;
 
 	if (HoGFeatColIndex>=EstimWidth) {
 		if (CoreId==0) {
@@ -55,14 +55,14 @@ void KerReadHoGFeatCol(KerReadHoGFeatCol_ArgT *Arg)
 }
 
 static unsigned int EstimateOneWindow(
-	Wordu16 ** __restrict__ HoGFeatCols,
-	Wordu32 First,
-	Wordu32 Last,
-	Wordu32 W)
+	uint16_t ** __restrict__ HoGFeatCols,
+	uint32_t First,
+	uint32_t Last,
+	uint32_t W)
 
 {
 	unsigned  int i, j;
-	Wordu32 Acc = 0;
+	uint32_t Acc = 0;
 	unsigned int SizeH = (Last-First)/2;
 	static int Vect = 1;
 
@@ -71,7 +71,7 @@ static unsigned int EstimateOneWindow(
 			v2u *FeatColV = (v2u *) (HoGFeatCols + i);
 			for (j=First; j<(First+SizeH); j++) Acc = gap8_sumdotpu2(FeatColV[j], ((v2u) {1,1}), Acc);
 		} else {
-			Wordu16 *FeatCol = HoGFeatCols[i];
+			uint16_t *FeatCol = HoGFeatCols[i];
 			for (j=First; j<Last; j++) Acc += FeatCol[j];
 		}
 	}
@@ -81,12 +81,12 @@ static unsigned int EstimateOneWindow(
 void KerEstimate(KerEstimate_ArgT *Arg)
 
 {
-	Wordu16 ** __restrict__ HoGFeatCols = Arg->HoGFeatCols;
-	Wordu32 FeatureSize = Arg->FeatureSize;
-	Wordu32 WEstimator = Arg->WEstimator;
-	Wordu32 HEstimator = Arg->HEstimator;
-	Wordu32 HFeatCols = Arg->HFeatCols;
-	Wordu32 * __restrict__ Out = Arg->Out;
+	uint16_t ** __restrict__ HoGFeatCols = Arg->HoGFeatCols;
+	uint32_t FeatureSize = Arg->FeatureSize;
+	uint32_t WEstimator = Arg->WEstimator;
+	uint32_t HEstimator = Arg->HEstimator;
+	uint32_t HFeatCols = Arg->HFeatCols;
+	uint32_t * __restrict__ Out = Arg->Out;
     unsigned int CoreId = gap8_coreid();
     unsigned int ChunkCell = ChunkSize((HFeatCols-HEstimator)+1);
 	unsigned int First = CoreId*ChunkCell, Last  = Min((HFeatCols-HEstimator)+1, First+ChunkCell);
@@ -100,23 +100,23 @@ void KerEstimate(KerEstimate_ArgT *Arg)
 }
 
 typedef struct {
-	Wordu16 ** __restrict__ HoGFeatCols;
-	Wordu32 FirstLine;
-	Wordu32 W;
-	Wordu32 H;
-	Wordu32 FeatureSize;
-	Wordu16 * __restrict__ Buffer;
+	uint16_t ** __restrict__ HoGFeatCols;
+	uint32_t FirstLine;
+	uint32_t W;
+	uint32_t H;
+	uint32_t FeatureSize;
+	uint16_t * __restrict__ Buffer;
 } KerExtractWindow_ArgT;
 
 void KerExtractWindow(KerExtractWindow_ArgT *Arg)
 
 {
-	Wordu16 ** __restrict__ HoGFeatCols = Arg->HoGFeatCols;
-	Wordu32 FirstLine = Arg->FirstLine;
-	Wordu32 W = Arg->W;
-	Wordu32 H = Arg->H;
-	Wordu32 FeatureSize = Arg->FeatureSize;
-	Wordu16 * __restrict__ Buffer = Arg->Buffer;
+	uint16_t ** __restrict__ HoGFeatCols = Arg->HoGFeatCols;
+	uint32_t FirstLine = Arg->FirstLine;
+	uint32_t W = Arg->W;
+	uint32_t H = Arg->H;
+	uint32_t FeatureSize = Arg->FeatureSize;
+	uint16_t * __restrict__ Buffer = Arg->Buffer;
 
 	unsigned int CoreId = gap8_coreid();
 	unsigned int ChunkCell = ChunkSize(W);
@@ -128,7 +128,7 @@ void KerExtractWindow(KerExtractWindow_ArgT *Arg)
 		for (unsigned j=0; j<H; j++) {
 			v2u * __restrict__ VBuffer  = (v2u *) (&Buffer[FeatureSize*(W*j + i)]);
 			v2u * __restrict__ VFeatCol = (v2u *) (&FeatCol[FeatureSize*j]);
-			
+
 			for (unsigned k=0; k<(FeatureSize/4); k++) {
 				v2u V0 = VFeatCol[2*k], V1 = VFeatCol[2*k+1];
 				VBuffer[2*k] = V0; VBuffer[2*k+1] = V1;
@@ -178,18 +178,18 @@ static inline int EvalWeakPredictor(unsigned short int * __restrict__ Win, HoGWe
 }
 
 typedef struct {
-	Wordu16 * __restrict__ Win;
+	uint16_t * __restrict__ Win;
 	HoGWeakPredictor_T *Model;
-	Wordu32 ModelSize;
-	Wordu8 * __restrict__ Out;
+	uint32_t ModelSize;
+	uint8_t * __restrict__ Out;
 } KerPredictWin_ArgT;
 static void KerPredictWin(KerPredictWin_ArgT *Arg)
 
 {
-	Wordu16 * __restrict__ Win = Arg->Win;
+	uint16_t * __restrict__ Win = Arg->Win;
 	HoGWeakPredictor_T *Model = Arg->Model;
-	Wordu32 ModelSize = Arg->ModelSize;
-	Wordu8 * __restrict__ Out = Arg->Out;
+	uint32_t ModelSize = Arg->ModelSize;
+	uint8_t * __restrict__ Out = Arg->Out;
         unsigned int CoreId = gap8_coreid();
         unsigned int ChunkCell = ChunkSize(ModelSize);
         unsigned int First = CoreId*ChunkCell, Last  = Min(ModelSize, First+ChunkCell);
@@ -208,24 +208,24 @@ static void KerPredictWin(KerPredictWin_ArgT *Arg)
 		if ((Acc>>(10+6))>0) printf("Match: %X\n", Acc>>(10+6));
 	}
 	gap8_waitbarrier(0);
-	
+
 }
 
 typedef struct {
-	Wordu16 * __restrict__ Win;
-	Wordu32 FeatureSize;
-	Wordu32 WEstimator;
-	Wordu32 HEstimator;
-	Wordu32 * __restrict__ Out;
+	uint16_t * __restrict__ Win;
+	uint32_t FeatureSize;
+	uint32_t WEstimator;
+	uint32_t HEstimator;
+	uint32_t * __restrict__ Out;
 } KerProcessWin_ArgT;
 static void KerProcessWin(KerProcessWin_ArgT *Arg)
 
 {
-	Wordu16 * __restrict__ Win = Arg->Win;
-	Wordu32 FeatureSize = Arg->FeatureSize;
-	Wordu32 WEstimator = Arg->WEstimator;
-	Wordu32 HEstimator = Arg->HEstimator;
-	Wordu32 * __restrict__ Out = Arg->Out;
+	uint16_t * __restrict__ Win = Arg->Win;
+	uint32_t FeatureSize = Arg->FeatureSize;
+	uint32_t WEstimator = Arg->WEstimator;
+	uint32_t HEstimator = Arg->HEstimator;
+	uint32_t * __restrict__ Out = Arg->Out;
 
         unsigned int CoreId = gap8_coreid();
         unsigned int ChunkCell = ChunkSize(WEstimator*FeatureSize);
@@ -251,18 +251,18 @@ static void KerProcessWin(KerProcessWin_ArgT *Arg)
 }
 
 void KerEstimateWin(
-	Wordu16 ** __restrict__ HoGFeatCols,
-	Wordu32 FeatureSize,
-	Wordu32 WEstimator,
-	Wordu32 HEstimator,
-	Wordu32 HFeatCols,
-	Wordu32 * __restrict__ Out,
-	Wordu16 * __restrict__ Buffer)
+	uint16_t ** __restrict__ HoGFeatCols,
+	uint32_t FeatureSize,
+	uint32_t WEstimator,
+	uint32_t HEstimator,
+	uint32_t HFeatCols,
+	uint32_t * __restrict__ Out,
+	uint16_t * __restrict__ Buffer)
 
 {
 	KerExtractWindow_ArgT Win;
 	KerProcessWin_ArgT PWin;
-	
+
 	Win.HoGFeatCols = HoGFeatCols;
 	Win.W = WEstimator;
 	Win.H = HEstimator;
@@ -287,12 +287,12 @@ void KerEstimateWin(
 	}
 }
 
-int CheckFirst(Wordu16 ** __restrict__ HoGFeatCols,
-        Wordu32 LineIndex,
-        Wordu32 ColumnIndex,
-        Wordu32 FeatureSize,
+int CheckFirst(uint16_t ** __restrict__ HoGFeatCols,
+        uint32_t LineIndex,
+        uint32_t ColumnIndex,
+        uint32_t FeatureSize,
         HoGWeakPredictorBis_T * __restrict__ Model,
-        Wordu32 Last)
+        uint32_t Last)
 
 {
 	unsigned int FromLine = LineIndex*FeatureSize;
@@ -309,12 +309,12 @@ int CheckFirst(Wordu16 ** __restrict__ HoGFeatCols,
 }
 
 static void KerWeakPredictOneWindow(
-	Wordu16 ** __restrict__ HoGFeatCols,
-	Wordu32 LineIndex,
-	Wordu32 ColumnIndex,
-	Wordu32 FeatureSize,
+	uint16_t ** __restrict__ HoGFeatCols,
+	uint32_t LineIndex,
+	uint32_t ColumnIndex,
+	uint32_t FeatureSize,
 	HoGWeakPredictorBis_T * __restrict__ Model,
-	Wordu32 ModelSize)
+	uint32_t ModelSize)
 
 {
 	unsigned int FromLine = LineIndex*FeatureSize;
@@ -325,7 +325,7 @@ static void KerWeakPredictOneWindow(
 	int Check = 0, T = -7000;
 
 
-	
+
 	for (unsigned int r=0; r<Nr; r++) {
 		unsigned int i;
 		for (i=Range[2*r]; i<Range[2*r+1]; i++) {
@@ -388,13 +388,13 @@ static void KerWeakPredictOneWindow(
 void KerWeakEstimateAllWindows(KerWeakEstimate_ArgT *Arg)
 
 {
-	Wordu16 ** __restrict__ HoGFeatCols = Arg->HoGFeatCols;
-	Wordu32 ColumnIndexM1 = Arg->ColumnIndexM1;
-	Wordu32 HEstimator = Arg->HEstimator;
-	Wordu32 HFeatCols = Arg->HFeatCols;
-	Wordu32 FeatureSize = Arg->FeatureSize;
+	uint16_t ** __restrict__ HoGFeatCols = Arg->HoGFeatCols;
+	uint32_t ColumnIndexM1 = Arg->ColumnIndexM1;
+	uint32_t HEstimator = Arg->HEstimator;
+	uint32_t HFeatCols = Arg->HFeatCols;
+	uint32_t FeatureSize = Arg->FeatureSize;
 	HoGWeakPredictorBis_T * __restrict__ Model = Arg->Model;
-	Wordu32 ModelSize = Arg->ModelSize;
+	uint32_t ModelSize = Arg->ModelSize;
 
         unsigned int CoreId = gap8_coreid();
         unsigned int ChunkCell = ChunkSize((HFeatCols-HEstimator)+1);
@@ -407,20 +407,20 @@ void KerWeakEstimateAllWindows(KerWeakEstimate_ArgT *Arg)
 }
 
 void KerWeakEstimateWin(
-	Wordu16 ** __restrict__ HoGFeatCols,
-	Wordu32 FeatureSize,
-	Wordu32 WEstimator,
-	Wordu32 HEstimator,
-	Wordu32 HFeatCols,
-	Wordu8 * __restrict__ Out,
-	Wordu16 * __restrict__ Buffer,
+	uint16_t ** __restrict__ HoGFeatCols,
+	uint32_t FeatureSize,
+	uint32_t WEstimator,
+	uint32_t HEstimator,
+	uint32_t HFeatCols,
+	uint8_t * __restrict__ Out,
+	uint16_t * __restrict__ Buffer,
 	HoGWeakPredictor_T * __restrict__ Model,
-	Wordu32 ModelSize)
+	uint32_t ModelSize)
 
 {
 	KerExtractWindow_ArgT Win;
 	KerPredictWin_ArgT PWin;
-	
+
 	Win.HoGFeatCols = HoGFeatCols;
 	Win.W = WEstimator;
 	Win.H = HEstimator;

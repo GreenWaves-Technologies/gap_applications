@@ -1,57 +1,56 @@
 #ifndef __HOGESTIMBASICKERNELS_H__
 #define __HOGESTIMBASICKERNELS_H__
 #include "Gap8.h"
-#include "StdTypes.h"
 #include "HoGEstimParameters.h"
 
 typedef struct {
-	Wordu16 * __restrict__ In;
-	Wordu32 H;
-	Wordu32 FeatureSize;
-	Wordu32 EstimWidth;
-	Wordu16 ** __restrict__ HoGFeatCols;
-	Wordu32 HoGFeatColIndex;
+	uint16_t * __restrict__ In;
+	uint32_t H;
+	uint32_t FeatureSize;
+	uint32_t EstimWidth;
+	uint16_t ** __restrict__ HoGFeatCols;
+	uint32_t HoGFeatColIndex;
 } KerReadHoGFeatCol_ArgT;
 void KerReadHoGFeatCol(KerReadHoGFeatCol_ArgT *Arg);
 
 typedef struct {
-	Wordu16 ** __restrict__ HoGFeatCols;
-	Wordu32 FeatureSize;
-	Wordu32 WEstimator;
-	Wordu32 HEstimator;
-	Wordu32 HFeatCols;
-	Wordu32 * __restrict__ Out;
+	uint16_t ** __restrict__ HoGFeatCols;
+	uint32_t FeatureSize;
+	uint32_t WEstimator;
+	uint32_t HEstimator;
+	uint32_t HFeatCols;
+	uint32_t * __restrict__ Out;
 } KerEstimate_ArgT;
 void KerEstimate(KerEstimate_ArgT *Arg);
 
 void KerEstimateWin(
-        Wordu16 ** __restrict__ HoGFeatCols,
-        Wordu32 FeatureSize,
-        Wordu32 WEstimator,
-        Wordu32 HEstimator,
-        Wordu32 HFeatCols,
-        Wordu32 * __restrict__ Out,
-        Wordu16 * __restrict__ Buffer);
+        uint16_t ** __restrict__ HoGFeatCols,
+        uint32_t FeatureSize,
+        uint32_t WEstimator,
+        uint32_t HEstimator,
+        uint32_t HFeatCols,
+        uint32_t * __restrict__ Out,
+        uint16_t * __restrict__ Buffer);
 
 void KerWeakEstimateWin(
-        Wordu16 ** __restrict__ HoGFeatCols,
-        Wordu32 FeatureSize,
-        Wordu32 WEstimator,
-        Wordu32 HEstimator,
-        Wordu32 HFeatCols,
-        Wordu8 * __restrict__ Out,
-        Wordu16 * __restrict__ Buffer,
+        uint16_t ** __restrict__ HoGFeatCols,
+        uint32_t FeatureSize,
+        uint32_t WEstimator,
+        uint32_t HEstimator,
+        uint32_t HFeatCols,
+        uint8_t * __restrict__ Out,
+        uint16_t * __restrict__ Buffer,
         HoGWeakPredictor_T * __restrict__ Model,
-        Wordu32 ModelSize);
+        uint32_t ModelSize);
 
 typedef struct {
-        Wordu16 ** __restrict__ HoGFeatCols;
-	Wordu32 ColumnIndexM1;
-        Wordu32 HEstimator;
-        Wordu32 HFeatCols;
-        Wordu32 FeatureSize;
+        uint16_t ** __restrict__ HoGFeatCols;
+	uint32_t ColumnIndexM1;
+        uint32_t HEstimator;
+        uint32_t HFeatCols;
+        uint32_t FeatureSize;
         HoGWeakPredictorBis_T * __restrict__ Model;
-        Wordu32 ModelSize;
+        uint32_t ModelSize;
 } KerWeakEstimate_ArgT;
 void KerWeakEstimateAllWindows(KerWeakEstimate_ArgT *Arg);
 

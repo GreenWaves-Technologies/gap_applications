@@ -7,8 +7,8 @@
 pulpChip = GAP
 PULP_APP = faceDetect
 TILER_PATH = $(GAP_SDK_HOME)/tools/autotiler
-#TILER_GENERATOR_PATH=$(TILER_PATH)/autotiler_generator
-#MODEL_SRC = $(TILER_GENERATOR_PATH)/HoG/HoGGenerator.c HoGModelExample.c
+TILER_LIB = $(TILER_PATH)/lib/libtile.a
+TILER_INC = $(TILER_PATH)/include
 MODEL_SRC = FaceDetGenerator.c FaceDetModel.c
 
 MODEL_GEN = FaceDetKernels FaceDetKernelsInit
@@ -17,30 +17,16 @@ MODEL_GEN_CLEAN = $(MODEL_GEN_C) $(addsuffix .h, $(MODEL_GEN))
 pulpFc=1
 RM=rm -f
 
-#PULP_APP_SRCS = main.c ImgIO.c $(MODEL_GEN_C) $(TILER_GENERATOR_PATH)/HoG/IIBasicKernels.c HyperFlashFS.c
 PULP_APP_SRCS = main.c $(MODEL_GEN_C) FaceDetBasicKernels.c ImageDraw.c ili9341.c pad.c ImgIO.c
-#pmu_driver.c
 
-#Read image from file system driver
-#override CONFIG_OPT += hyperflash hyperflash/fs/files=$(CURDIR)/img51.pgm
-#Read images from camera driver
-#override CONFIG_OPT += camera=himax system/camera/image-stream=$(CURDIR)/sampleImages/img0%d.pgm
-override CONFIG_OPT += camera=himax
-#override CONFIG_OPT += camera=ov7670 system/camera/image-stream=$(CURDIR)/sampleImages/img0%d.pgm
-
-
-#PULP_ARCH_CFLAGS=-march=IMXgap8 -mPE=8 -mFC=1
-#PULP_ARCH_LDFLAGS=-march=IMXgap8 -mPE=8 -mFC=1
 PULP_CFLAGS += -O3
 PULP_CFLAGS += -mno-memcpy -fno-tree-loop-distribute-patterns -fdata-sections -ffunction-sections -Wimplicit-fallthrough=0
-PULP_CFLAGS += -Wno-unused-but-set-variable -Wno-maybe-uninitialized
-PULP_CFLAGS += -I$(TILER_PATH)/StdTypes/
-#-I$(TILER_GENERATOR_PATH)/HoG
-#PULP_LDFLAGS +=  -flto -Wl,--gc-sections
+PULP_CFLAGS += -Wno-implicit-function-declaration -Wno-unused-but-set-variable -Wno-maybe-uninitialized
+PULP_CFLAGS += -I$(TILER_INC)
 
 # The generated code outputs a maybe-uninitialized error which is rather difficult to suppress
 # in a clean way.
-#PULP_CFLAGS += -Wall -Werror -Wno-maybe-uninitialized -Wno-unused-but-set-variable
+PULP_CFLAGS += -Wall -Werror -Wno-maybe-uninitialized -Wno-unused-but-set-variable
 
 #PLPBRIDGE_FLAGS+= -f -hyper
 
@@ -51,8 +37,7 @@ all:: model
 
 # Build the code generator
 GenTile:
-	gcc -o GenTile -Wno-implicit-function-declaration -I$(TILER_PATH)/GenTiling -I$(TILER_PATH)/StdTypes/ $(MODEL_SRC) $(TILER_PATH)/GenTiling/LibTile.a
-	#gcc -o GenTile -I$(TILER_GENERATOR_PATH)/II -I$(TILER_PATH)/GenTiling -I$(TILER_PATH)/StdTypes/ $(MODEL_SRC) $(TILER_PATH)/GenTiling/LibTile.a
+	gcc -o GenTile -I$(TILER_INC) $(MODEL_SRC) $(TILER_LIB)
 
 # Run the code generator
 $(MODEL_GEN_C): GenTile

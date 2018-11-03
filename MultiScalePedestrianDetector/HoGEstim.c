@@ -7,6 +7,7 @@
 #include "archi_gap8Gpio.h"
 #include "pad.h"
 #include "padframe.h"
+#include "ili9341.h"
 #define STACK_SIZE      2048
 #define MOUNT           1
 #define UNMOUNT         0
@@ -219,7 +220,9 @@ int CountPositive(unsigned char *Out, unsigned int West, unsigned int Hest, unsi
 }
 
 int ProcessOneLevel(int Level, unsigned char *ImageInRef, unsigned char *ImageIn, unsigned int Wref, unsigned int Href, unsigned int W, unsigned int H,
-		    Kernel_T *ConfHOG, Kernel_T *ConfResize, Kernel_T *ConfWeakHOGEstim)
+		    void (*MyHOG)(uint8_t*, uint16_t**, uint16_t*, uint32_t, uint32_t, Kernel_Exec_T *),
+            void (*MyResize)(uint8_t*, uint8_t*, Kernel_Exec_T*),
+            void (*MyWeakHOGEstim)(uint16_t *, uint16_t **, uint32_t , HoGWeakPredictorBis_T*, uint32_t, Kernel_Exec_T * ))
 
 {
     unsigned int BlockW = (((((W-2)/HOG_CELL_SIZE) - HOG_BLOCK_SIZE)/(HOG_BLOCK_CELL_STRIDE)) + 1);   // Number of blocks in a line
@@ -231,9 +234,10 @@ int ProcessOneLevel(int Level, unsigned char *ImageInRef, unsigned char *ImageIn
 	ReportHoGLevelConfiguration(Level, W, H);
 	#endif
 	SetBBAspectRatio(Wref, W);
-	if (ConfResize) {
+	if (MyResize) {
 		Ti = gap8_readhwtimer();
-		MyResize(ImageInRef, ImageIn, ((Wref-1)<<16)/W, ((Href-1)<<16)/H, ConfResize);
+		//MyResize(ImageInRef, ImageIn, ((Wref-1)<<16)/W, ((Href-1)<<16)/H, ConfResize);
+		MyResize(ImageInRef, ImageIn, NULL);
 		Ti = gap8_readhwtimer() - Ti;
 		#if VERBOSE
 		printf("Resize [%3d x %3d] to [%3d x %3d]:                           %10d cycles. %3d cycles per pixel\n", Wref, Href, W, H, Ti, Ti/(W*H));
@@ -250,7 +254,7 @@ int ProcessOneLevel(int Level, unsigned char *ImageInRef, unsigned char *ImageIn
 
 	Ti = gap8_readhwtimer();
 	MyHOG(ImageIn, (unsigned short **) CellLinesBuffer, HoGFeatures,
-              W*HOG_BLOCK_SIZE*HOG_CELL_SIZE, BlockW*HOG_BLOCK_SIZE*HOG_BLOCK_SIZE*HOG_NBINS, ConfHOG);
+              W*HOG_BLOCK_SIZE*HOG_CELL_SIZE, BlockW*HOG_BLOCK_SIZE*HOG_BLOCK_SIZE*HOG_NBINS, 0);
 	Ti = gap8_readhwtimer() - Ti;
 	#if VERBOSE
 	printf("Hog Features extraction [W:%d, H:%d]:                      %10d cycles. %3d cycles per pixel\n", W, H, Ti, Ti/(W*H));
@@ -270,8 +274,8 @@ int ProcessOneLevel(int Level, unsigned char *ImageInRef, unsigned char *ImageIn
 		return 1;
 	}
 	Ti = gap8_readhwtimer();
-	MyWeakHOGEstim(HoGFeatures, (Wordu16 ** restrict) HoGFeatColsBuffer, BlockH,
-		       WeakEstimModel, sizeof(Model)/sizeof(HoGWeakPredictorBis_T), ConfWeakHOGEstim);
+	MyWeakHOGEstim(HoGFeatures, (uint16_t ** restrict) HoGFeatColsBuffer, BlockH,
+		       WeakEstimModel, sizeof(Model)/sizeof(HoGWeakPredictorBis_T), 0);
 	Ti = gap8_readhwtimer() - Ti;
 	#if VERBOSE
 	printf("Estimation on %3d [%3d x %3d x %3d] windows of HOG features: %10d cycles. %3d cycles per weak predictor.\n",
@@ -389,13 +393,13 @@ void cluster_main(ArgCluster_T* arg){
 		#endif
 
 
-		ProcessOneLevel( 0, ImageIn, ImageIn,  W, H, W-0*W/HOG_ESTIM_SCALE_FACTOR, H-0*H/HOG_ESTIM_SCALE_FACTOR, KER_GR_ARGS_MyHOG_1,                   0, KER_GR_ARGS_MyWeakHOGEstim_1);
-		ProcessOneLevel(-1, ImageIn, ImageIn1, W, H, W-1*W/HOG_ESTIM_SCALE_FACTOR, H-1*H/HOG_ESTIM_SCALE_FACTOR, KER_GR_ARGS_MyHOG_2, KER_ARGS_MyResize_1, KER_GR_ARGS_MyWeakHOGEstim_2);
-		ProcessOneLevel(-2, ImageIn, ImageIn1, W, H, W-2*W/HOG_ESTIM_SCALE_FACTOR, H-2*H/HOG_ESTIM_SCALE_FACTOR, KER_GR_ARGS_MyHOG_3, KER_ARGS_MyResize_2, KER_GR_ARGS_MyWeakHOGEstim_3);
-		ProcessOneLevel(-3, ImageIn, ImageIn1, W, H, W-3*W/HOG_ESTIM_SCALE_FACTOR, H-3*H/HOG_ESTIM_SCALE_FACTOR, KER_GR_ARGS_MyHOG_4, KER_ARGS_MyResize_3, KER_GR_ARGS_MyWeakHOGEstim_4);
+		ProcessOneLevel( 0, ImageIn, ImageIn,  W, H, W-0*W/HOG_ESTIM_SCALE_FACTOR, H-0*H/HOG_ESTIM_SCALE_FACTOR, MyHOG,              0, MyWeakHOGEstim);
+		ProcessOneLevel(-1, ImageIn, ImageIn1, W, H, W-1*W/HOG_ESTIM_SCALE_FACTOR, H-1*H/HOG_ESTIM_SCALE_FACTOR, MyHOG_N1, MyResize_N1, MyWeakHOGEstim_N1);
+		ProcessOneLevel(-2, ImageIn, ImageIn1, W, H, W-2*W/HOG_ESTIM_SCALE_FACTOR, H-2*H/HOG_ESTIM_SCALE_FACTOR, MyHOG_N2, MyResize_N2, MyWeakHOGEstim_N2);
+		ProcessOneLevel(-3, ImageIn, ImageIn1, W, H, W-3*W/HOG_ESTIM_SCALE_FACTOR, H-3*H/HOG_ESTIM_SCALE_FACTOR, MyHOG_N3, MyResize_N3, MyWeakHOGEstim_N3);
 
-		ProcessOneLevel(+1, ImageIn, ImageIn1, W, H, W+1*W/HOG_ESTIM_SCALE_FACTOR, H+1*H/HOG_ESTIM_SCALE_FACTOR, KER_GR_ARGS_MyHOG_5, KER_ARGS_MyResize_4, KER_GR_ARGS_MyWeakHOGEstim_5);
-		ProcessOneLevel(+2, ImageIn, ImageIn1, W, H, W+2*W/HOG_ESTIM_SCALE_FACTOR, H+2*H/HOG_ESTIM_SCALE_FACTOR, KER_GR_ARGS_MyHOG_6, KER_ARGS_MyResize_5, KER_GR_ARGS_MyWeakHOGEstim_6);
+		ProcessOneLevel(+1, ImageIn, ImageIn1, W, H, W+1*W/HOG_ESTIM_SCALE_FACTOR, H+1*H/HOG_ESTIM_SCALE_FACTOR, MyHOG_1, MyResize_1, MyWeakHOGEstim_1);
+		ProcessOneLevel(+2, ImageIn, ImageIn1, W, H, W+2*W/HOG_ESTIM_SCALE_FACTOR, H+2*H/HOG_ESTIM_SCALE_FACTOR, MyHOG_2, MyResize_2, MyWeakHOGEstim_2);
 
 		RemoveNonMaxBB();
 

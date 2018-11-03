@@ -43,8 +43,6 @@ int main(int argc, char **argv)
 
 // AutoTiler Libraries
 #include "AutoTilerLib.h"
-// AutoTiler Standard types plus a set of pre defined types for basic kernels
-#include "StdTypes.h"
 // HOG parameters definitions
 #include "HoGParameters.h"
 // HOG Estim parameters definitions
@@ -66,10 +64,10 @@ int main(int argc, char **argv)
 	// HOGEstimConfiguration(12300);
 	HOGEstimConfiguration(17000);
 	// Load the HOG basic kernels template library
-        LoadHOGLibrary();
+    LoadHOGLibrary();
 	// Load Resize basic kernels and dependencies */
 	LoadResizeLibrary();
-	LoadResizeDependencies();
+    SetUsedFilesNames(0, 1, "ResizeBasicKernels.h");
 	// Call HOG generator, here image is [320x240], the HOG parameters come from HOGParameters.h and HoGEstimParameters.h
 
 	// unsigned int W = 640, H = 480;
@@ -84,28 +82,28 @@ int main(int argc, char **argv)
 	GenerateWeakHOGEstimatorBis("MyWeakHOGEstim",W        , H        , HOG_CELL_SIZE, HOG_BLOCK_SIZE, HOG_BLOCK_OVERLAP, HOG_NBINS, We, He, 1, HOG_WEAK_ESTIM);
 	// Second level of the pyramid, Plain resolution reduced by 1/8, Generates resize, HOG Features and HOG Estimator
 	l_v=-1;
-	GenerateResize	        ("MyResize",      W        , H        , (W+l_v*(W/HOG_ESTIM_SCALE_FACTOR)), (H+l_v*(H/HOG_ESTIM_SCALE_FACTOR)));
-	GenerateHOG             ("MyHOG",         (W+l_v*(W/HOG_ESTIM_SCALE_FACTOR)), (H+l_v*(H/HOG_ESTIM_SCALE_FACTOR)), HOG_CELL_SIZE, HOG_BLOCK_SIZE, HOG_BLOCK_OVERLAP, HOG_NBINS);
-	GenerateWeakHOGEstimatorBis("MyWeakHOGEstim",(W+l_v*(W/HOG_ESTIM_SCALE_FACTOR)), (H+l_v*(H/HOG_ESTIM_SCALE_FACTOR)), HOG_CELL_SIZE, HOG_BLOCK_SIZE, HOG_BLOCK_OVERLAP, HOG_NBINS, We, He, 1, HOG_WEAK_ESTIM);
+	GenerateResize	        ("MyResize_N1",      W        , H        , (W+l_v*(W/HOG_ESTIM_SCALE_FACTOR)), (H+l_v*(H/HOG_ESTIM_SCALE_FACTOR)));
+	GenerateHOG             ("MyHOG_N1",         (W+l_v*(W/HOG_ESTIM_SCALE_FACTOR)), (H+l_v*(H/HOG_ESTIM_SCALE_FACTOR)), HOG_CELL_SIZE, HOG_BLOCK_SIZE, HOG_BLOCK_OVERLAP, HOG_NBINS);
+	GenerateWeakHOGEstimatorBis("MyWeakHOGEstim_N1",(W+l_v*(W/HOG_ESTIM_SCALE_FACTOR)), (H+l_v*(H/HOG_ESTIM_SCALE_FACTOR)), HOG_CELL_SIZE, HOG_BLOCK_SIZE, HOG_BLOCK_OVERLAP, HOG_NBINS, We, He, 1, HOG_WEAK_ESTIM);
 
 	// Third level of the pyramid, Plain resolution reduced by 2/8, Generates resize, HOG Features and HOG Estimator
 	l_v=-2;
-	GenerateResize	        ("MyResize",      W        , H        , (W+l_v*(W/HOG_ESTIM_SCALE_FACTOR)), (H+l_v*(H/HOG_ESTIM_SCALE_FACTOR)));
-	GenerateHOG             ("MyHOG",            (W+l_v*(W/HOG_ESTIM_SCALE_FACTOR)),    (H+l_v*(H/HOG_ESTIM_SCALE_FACTOR)), HOG_CELL_SIZE, HOG_BLOCK_SIZE, HOG_BLOCK_OVERLAP, HOG_NBINS);
-	GenerateWeakHOGEstimatorBis("MyWeakHOGEstim",(W+l_v*(W/HOG_ESTIM_SCALE_FACTOR)), (H+l_v*(H/HOG_ESTIM_SCALE_FACTOR)), HOG_CELL_SIZE, HOG_BLOCK_SIZE, HOG_BLOCK_OVERLAP, HOG_NBINS, We, He, 1, HOG_WEAK_ESTIM);
+	GenerateResize	        ("MyResize_N2",      W        , H        , (W+l_v*(W/HOG_ESTIM_SCALE_FACTOR)), (H+l_v*(H/HOG_ESTIM_SCALE_FACTOR)));
+	GenerateHOG             ("MyHOG_N2",            (W+l_v*(W/HOG_ESTIM_SCALE_FACTOR)),    (H+l_v*(H/HOG_ESTIM_SCALE_FACTOR)), HOG_CELL_SIZE, HOG_BLOCK_SIZE, HOG_BLOCK_OVERLAP, HOG_NBINS);
+	GenerateWeakHOGEstimatorBis("MyWeakHOGEstim_N2",(W+l_v*(W/HOG_ESTIM_SCALE_FACTOR)), (H+l_v*(H/HOG_ESTIM_SCALE_FACTOR)), HOG_CELL_SIZE, HOG_BLOCK_SIZE, HOG_BLOCK_OVERLAP, HOG_NBINS, We, He, 1, HOG_WEAK_ESTIM);
 
 	// Fourth level of the pyramid, Plain resolution reduced by 3/8, Generates resize, HOG Features and HOG Estimator
 	l_v=-3;
-	
-	GenerateResize	        ("MyResize",      W        , H        , (W+l_v*(W/HOG_ESTIM_SCALE_FACTOR)), (H+l_v*(H/HOG_ESTIM_SCALE_FACTOR)));
-	GenerateHOG             ("MyHOG",             (W+l_v*(W/HOG_ESTIM_SCALE_FACTOR)), (H+l_v*(H/HOG_ESTIM_SCALE_FACTOR)), HOG_CELL_SIZE, HOG_BLOCK_SIZE, HOG_BLOCK_OVERLAP, HOG_NBINS);
-	GenerateWeakHOGEstimatorBis("MyWeakHOGEstim", (W+l_v*(W/HOG_ESTIM_SCALE_FACTOR)), (H+l_v*(H/HOG_ESTIM_SCALE_FACTOR)), HOG_CELL_SIZE, HOG_BLOCK_SIZE, HOG_BLOCK_OVERLAP, HOG_NBINS, We, He, 1, HOG_WEAK_ESTIM);
+
+	GenerateResize	        ("MyResize_N3",      W        , H        , (W+l_v*(W/HOG_ESTIM_SCALE_FACTOR)), (H+l_v*(H/HOG_ESTIM_SCALE_FACTOR)));
+	GenerateHOG             ("MyHOG_N3",             (W+l_v*(W/HOG_ESTIM_SCALE_FACTOR)), (H+l_v*(H/HOG_ESTIM_SCALE_FACTOR)), HOG_CELL_SIZE, HOG_BLOCK_SIZE, HOG_BLOCK_OVERLAP, HOG_NBINS);
+	GenerateWeakHOGEstimatorBis("MyWeakHOGEstim_N3", (W+l_v*(W/HOG_ESTIM_SCALE_FACTOR)), (H+l_v*(H/HOG_ESTIM_SCALE_FACTOR)), HOG_CELL_SIZE, HOG_BLOCK_SIZE, HOG_BLOCK_OVERLAP, HOG_NBINS, We, He, 1, HOG_WEAK_ESTIM);
 
 
 /*
 	// Fourth level of the pyramid, Plain resolution reduced by 3/8, Generates resize, HOG Features and HOG Estimator
 	l_v=-4;
-	
+
 	GenerateResize	        ("MyResize",      W        , H        , (W+l_v*(W/HOG_ESTIM_SCALE_FACTOR)), (H+l_v*(H/HOG_ESTIM_SCALE_FACTOR)));
 	GenerateHOG             ("MyHOG",             (W+l_v*(W/HOG_ESTIM_SCALE_FACTOR)), (H+l_v*(H/HOG_ESTIM_SCALE_FACTOR)), HOG_CELL_SIZE, HOG_BLOCK_SIZE, HOG_BLOCK_OVERLAP, HOG_NBINS);
 	GenerateWeakHOGEstimatorBis("MyWeakHOGEstim", (W+l_v*(W/HOG_ESTIM_SCALE_FACTOR)), (H+l_v*(H/HOG_ESTIM_SCALE_FACTOR)), HOG_CELL_SIZE, HOG_BLOCK_SIZE, HOG_BLOCK_OVERLAP, HOG_NBINS, We, He, 1, HOG_WEAK_ESTIM);
@@ -114,7 +112,7 @@ int main(int argc, char **argv)
 
 	// Fourth level of the pyramid, Plain resolution reduced by 3/8, Generates resize, HOG Features and HOG Estimator
 	l_v=-5;
-	
+
 	GenerateResize	        ("MyResize",      W        , H        , (W+l_v*(W/HOG_ESTIM_SCALE_FACTOR)), (H+l_v*(H/HOG_ESTIM_SCALE_FACTOR)));
 	GenerateHOG             ("MyHOG",             (W+l_v*(W/HOG_ESTIM_SCALE_FACTOR)), (H+l_v*(H/HOG_ESTIM_SCALE_FACTOR)), HOG_CELL_SIZE, HOG_BLOCK_SIZE, HOG_BLOCK_OVERLAP, HOG_NBINS);
 	GenerateWeakHOGEstimatorBis("MyWeakHOGEstim", (W+l_v*(W/HOG_ESTIM_SCALE_FACTOR)), (H+l_v*(H/HOG_ESTIM_SCALE_FACTOR)), HOG_CELL_SIZE, HOG_BLOCK_SIZE, HOG_BLOCK_OVERLAP, HOG_NBINS, We, He, 1, HOG_WEAK_ESTIM);
@@ -122,21 +120,21 @@ int main(int argc, char **argv)
 /*
 	// Fourth level of the pyramid, Plain resolution reduced by 3/8, Generates resize, HOG Features and HOG Estimator
 	l_v=-6;
-	
+
 	GenerateResize	        ("MyResize",      W        , H        , (W+l_v*(W/HOG_ESTIM_SCALE_FACTOR)), (H+l_v*(H/HOG_ESTIM_SCALE_FACTOR)));
 	GenerateHOG             ("MyHOG",             (W+l_v*(W/HOG_ESTIM_SCALE_FACTOR)), (H+l_v*(H/HOG_ESTIM_SCALE_FACTOR)), HOG_CELL_SIZE, HOG_BLOCK_SIZE, HOG_BLOCK_OVERLAP, HOG_NBINS);
 	GenerateWeakHOGEstimatorBis("MyWeakHOGEstim", (W+l_v*(W/HOG_ESTIM_SCALE_FACTOR)), (H+l_v*(H/HOG_ESTIM_SCALE_FACTOR)), HOG_CELL_SIZE, HOG_BLOCK_SIZE, HOG_BLOCK_OVERLAP, HOG_NBINS, We, He, 1, HOG_WEAK_ESTIM);
 */
 	// Fourth level of the pyramid, Plain resolution reduced by 3/8, Generates resize, HOG Features and HOG Estimator
 /*	l_v=-7;
-	
+
 	GenerateResize	        ("MyResize",      W        , H        , (W+l_v*(W/HOG_ESTIM_SCALE_FACTOR)), (H+l_v*(H/HOG_ESTIM_SCALE_FACTOR)));
 	GenerateHOG             ("MyHOG",             (W+l_v*(W/HOG_ESTIM_SCALE_FACTOR)), (H+l_v*(H/HOG_ESTIM_SCALE_FACTOR)), HOG_CELL_SIZE, HOG_BLOCK_SIZE, HOG_BLOCK_OVERLAP, HOG_NBINS);
 	GenerateWeakHOGEstimatorBis("MyWeakHOGEstim", (W+l_v*(W/HOG_ESTIM_SCALE_FACTOR)), (H+l_v*(H/HOG_ESTIM_SCALE_FACTOR)), HOG_CELL_SIZE, HOG_BLOCK_SIZE, HOG_BLOCK_OVERLAP, HOG_NBINS, We, He, 1, HOG_WEAK_ESTIM);
 */
 	// Level
 /*	l_v=-8;
-	
+
 	GenerateResize	        ("MyResize",      W        , H        , (W+l_v*(W/HOG_ESTIM_SCALE_FACTOR)), (H+l_v*(H/HOG_ESTIM_SCALE_FACTOR)));
 	GenerateHOG             ("MyHOG",             (W+l_v*(W/HOG_ESTIM_SCALE_FACTOR)), (H+l_v*(H/HOG_ESTIM_SCALE_FACTOR)), HOG_CELL_SIZE, HOG_BLOCK_SIZE, HOG_BLOCK_OVERLAP, HOG_NBINS);
 	GenerateWeakHOGEstimatorBis("MyWeakHOGEstim", (W+l_v*(W/HOG_ESTIM_SCALE_FACTOR)), (H+l_v*(H/HOG_ESTIM_SCALE_FACTOR)), HOG_CELL_SIZE, HOG_BLOCK_SIZE, HOG_BLOCK_OVERLAP, HOG_NBINS, We, He, 1, HOG_WEAK_ESTIM);
@@ -144,20 +142,20 @@ int main(int argc, char **argv)
 
 	// Fifth level of the pyramid, Plain resolution increaed by 1/8, Generates resize, HOG Features and HOG Estimator
 	l_v=1;
-	GenerateResize	        ("MyResize",      W        , H        , (W+l_v*(W/HOG_ESTIM_SCALE_FACTOR)), (H+l_v*(H/HOG_ESTIM_SCALE_FACTOR)));
-	GenerateHOG             ("MyHOG",            (W+l_v*(W/HOG_ESTIM_SCALE_FACTOR)), (H+l_v*(H/HOG_ESTIM_SCALE_FACTOR)), HOG_CELL_SIZE, HOG_BLOCK_SIZE, HOG_BLOCK_OVERLAP, HOG_NBINS);
-	GenerateWeakHOGEstimatorBis("MyWeakHOGEstim",(W+l_v*(W/HOG_ESTIM_SCALE_FACTOR)), (H+l_v*(H/HOG_ESTIM_SCALE_FACTOR)), HOG_CELL_SIZE, HOG_BLOCK_SIZE, HOG_BLOCK_OVERLAP, HOG_NBINS, We, He, 1, HOG_WEAK_ESTIM);
+	GenerateResize	        ("MyResize_1",      W        , H        , (W+l_v*(W/HOG_ESTIM_SCALE_FACTOR)), (H+l_v*(H/HOG_ESTIM_SCALE_FACTOR)));
+	GenerateHOG             ("MyHOG_1",            (W+l_v*(W/HOG_ESTIM_SCALE_FACTOR)), (H+l_v*(H/HOG_ESTIM_SCALE_FACTOR)), HOG_CELL_SIZE, HOG_BLOCK_SIZE, HOG_BLOCK_OVERLAP, HOG_NBINS);
+	GenerateWeakHOGEstimatorBis("MyWeakHOGEstim_1",(W+l_v*(W/HOG_ESTIM_SCALE_FACTOR)), (H+l_v*(H/HOG_ESTIM_SCALE_FACTOR)), HOG_CELL_SIZE, HOG_BLOCK_SIZE, HOG_BLOCK_OVERLAP, HOG_NBINS, We, He, 1, HOG_WEAK_ESTIM);
 
 	// Sixth level of the pyramid, Plain resolution increaed by 2/8, Generates resize, HOG Features and HOG Estimator
 	l_v=2;
-	GenerateResize	        ("MyResize",      W        , H        , (W+l_v*(W/HOG_ESTIM_SCALE_FACTOR)), (H+l_v*(H/HOG_ESTIM_SCALE_FACTOR)));
-	GenerateHOG             ("MyHOG",            (W+l_v*(W/HOG_ESTIM_SCALE_FACTOR)), (H+l_v*(H/HOG_ESTIM_SCALE_FACTOR)), HOG_CELL_SIZE, HOG_BLOCK_SIZE, HOG_BLOCK_OVERLAP, HOG_NBINS);
-	GenerateWeakHOGEstimatorBis("MyWeakHOGEstim",(W+l_v*(W/HOG_ESTIM_SCALE_FACTOR)), (H+l_v*(H/HOG_ESTIM_SCALE_FACTOR)), HOG_CELL_SIZE, HOG_BLOCK_SIZE, HOG_BLOCK_OVERLAP, HOG_NBINS, We, He, 1, HOG_WEAK_ESTIM);
+	GenerateResize	        ("MyResize_2",      W        , H        , (W+l_v*(W/HOG_ESTIM_SCALE_FACTOR)), (H+l_v*(H/HOG_ESTIM_SCALE_FACTOR)));
+	GenerateHOG             ("MyHOG_2",            (W+l_v*(W/HOG_ESTIM_SCALE_FACTOR)), (H+l_v*(H/HOG_ESTIM_SCALE_FACTOR)), HOG_CELL_SIZE, HOG_BLOCK_SIZE, HOG_BLOCK_OVERLAP, HOG_NBINS);
+	GenerateWeakHOGEstimatorBis("MyWeakHOGEstim_2",(W+l_v*(W/HOG_ESTIM_SCALE_FACTOR)), (H+l_v*(H/HOG_ESTIM_SCALE_FACTOR)), HOG_CELL_SIZE, HOG_BLOCK_SIZE, HOG_BLOCK_OVERLAP, HOG_NBINS, We, He, 1, HOG_WEAK_ESTIM);
 
 	l_v=3;
-	GenerateResize	        ("MyResize",      W        , H        , (W+l_v*(W/HOG_ESTIM_SCALE_FACTOR)), (H+l_v*(H/HOG_ESTIM_SCALE_FACTOR)));
-	GenerateHOG             ("MyHOG",            (W+l_v*(W/HOG_ESTIM_SCALE_FACTOR)), (H+l_v*(H/HOG_ESTIM_SCALE_FACTOR)), HOG_CELL_SIZE, HOG_BLOCK_SIZE, HOG_BLOCK_OVERLAP, HOG_NBINS);
-	GenerateWeakHOGEstimatorBis("MyWeakHOGEstim",(W+l_v*(W/HOG_ESTIM_SCALE_FACTOR)), (H+l_v*(H/HOG_ESTIM_SCALE_FACTOR)), HOG_CELL_SIZE, HOG_BLOCK_SIZE, HOG_BLOCK_OVERLAP, HOG_NBINS, We, He, 1, HOG_WEAK_ESTIM);
+	GenerateResize	        ("MyResize_3",      W        , H        , (W+l_v*(W/HOG_ESTIM_SCALE_FACTOR)), (H+l_v*(H/HOG_ESTIM_SCALE_FACTOR)));
+	GenerateHOG             ("MyHOG_3",            (W+l_v*(W/HOG_ESTIM_SCALE_FACTOR)), (H+l_v*(H/HOG_ESTIM_SCALE_FACTOR)), HOG_CELL_SIZE, HOG_BLOCK_SIZE, HOG_BLOCK_OVERLAP, HOG_NBINS);
+	GenerateWeakHOGEstimatorBis("MyWeakHOGEstim_3",(W+l_v*(W/HOG_ESTIM_SCALE_FACTOR)), (H+l_v*(H/HOG_ESTIM_SCALE_FACTOR)), HOG_CELL_SIZE, HOG_BLOCK_SIZE, HOG_BLOCK_OVERLAP, HOG_NBINS, We, He, 1, HOG_WEAK_ESTIM);
 
 	/*l_v=4;
 	GenerateResize	        ("MyResize",      W        , H        , (W+l_v*(W/HOG_ESTIM_SCALE_FACTOR)), (H+l_v*(H/HOG_ESTIM_SCALE_FACTOR)));

@@ -117,8 +117,8 @@ short int FEAT_LIST[N_FRAME*NUMCEP];
 short int *InSignal = DataIn;
 short int *pfeat_list;
 
-// sqrt(2) to normalize dct 
-//#define NORMDCT  ((short int) floor(1.0/sqrt(2)*(1<<15)))		
+// sqrt(2) to normalize dct
+//#define NORMDCT  ((short int) floor(1.0/sqrt(2)*(1<<15)))
 
 
 #define CHECKSUM 52259
@@ -139,7 +139,7 @@ RT_L2_DATA  short int *l2_big1;
 
 
 void cnn_process (rt_perf_t *cluster_perf) {
-  
+
   unsigned int instr[3];
   unsigned int ElapsedTime[3];
   rt_perf_t *perf = cluster_perf;
@@ -148,10 +148,10 @@ void cnn_process (rt_perf_t *cluster_perf) {
 
   // Configure performance counters for counting the cycles
   rt_perf_conf(perf, (1<<RT_PERF_CYCLES)|(1<<RT_PERF_INSTR));
-  
+
   rt_perf_reset(perf);
   rt_perf_start(perf);
-  
+
 #ifdef RT_HAS_HWCE
   Conv8x20MaxPool2x2_HWCE_0(pfeat_list,L2_W_0,l2_big0,8,L2_B_0,AllKernels + 0);
 #else
@@ -161,9 +161,9 @@ void cnn_process (rt_perf_t *cluster_perf) {
   rt_perf_stop(perf);
   rt_perf_save(perf);
   instr[0] = rt_perf_get(perf, RT_PERF_INSTR);
-  ElapsedTime[0] = rt_perf_get(perf,RT_PERF_CYCLES); 
+  ElapsedTime[0] = rt_perf_get(perf,RT_PERF_CYCLES);
 
-  
+
 #ifdef DUMP_LAYER
   table_print_data_t(pfeat_list,98*40,40,"conv0 input ");
   table_print_data_t(L2_B_0,32,32,"conv0 bias ");
@@ -180,13 +180,13 @@ void cnn_process (rt_perf_t *cluster_perf) {
 #else
 
 #ifdef W_HALFCHAR
-  ConvLayer3(l2_big0,L2_W_1,l2_big1,8,L2_B_1,4,10,AllKernels + 1); 
+  ConvLayer3(l2_big0,L2_W_1,l2_big1,8,L2_B_1,4,10,AllKernels + 1);
 #endif
 #ifdef FULL_PREC
-  ConvLayer2(l2_big0,L2_W_1,l2_big1,8,L2_B_1,4,10,AllKernels + 1); 
+  ConvLayer2(l2_big0,L2_W_1,l2_big1,8,L2_B_1,4,10,AllKernels + 1);
 #endif
 #ifdef W_CHAR
-  ConvLayer3(l2_big0,L2_W_1,l2_big1,8,L2_B_1,4,10,AllKernels + 1); 
+  ConvLayer3(l2_big0,L2_W_1,l2_big1,8,L2_B_1,4,10,AllKernels + 1);
 #endif
 
 #endif
@@ -194,10 +194,10 @@ void cnn_process (rt_perf_t *cluster_perf) {
   rt_perf_stop(perf);
   rt_perf_save(perf);
   instr[1] = rt_perf_get(perf, RT_PERF_INSTR) - instr[0];
-  ElapsedTime[1] = rt_perf_get(perf,RT_PERF_CYCLES) - ElapsedTime[0]; 
+  ElapsedTime[1] = rt_perf_get(perf,RT_PERF_CYCLES) - ElapsedTime[0];
 
 
-  
+
 #ifdef DUMP_LAYER2
   table_print_data_t(L2_B_1,32,32,"conv1 bias ");
 
@@ -209,26 +209,26 @@ void cnn_process (rt_perf_t *cluster_perf) {
   table_print_data_char(L2_W_1,4*10*32*32,4,"conv1 weight ");
 #endif
 
-  
+
   rt_perf_reset(perf);
   rt_perf_start(perf);
 
   // in,filter,normfilter,bias,normbias,out,outsize
 #ifdef W_HALFCHAR
-  Dense_halfchar(l2_big1,L2_W_2,10,L2_B_2,0,l2_big0,12,AllKernels + 2); 
+  Dense_halfchar(l2_big1,L2_W_2,10,L2_B_2,0,l2_big0,12,AllKernels + 2);
 #endif
 #ifdef FULL_PREC
-  Dense2(l2_big1,L2_W_2,10,L2_B_2,0,l2_big0,12,AllKernels + 2); 
+  Dense2(l2_big1,L2_W_2,10,L2_B_2,0,l2_big0,12,AllKernels + 2);
 #endif
 #ifdef W_CHAR
-  Dense2(l2_big1,L2_W_2,10,L2_B_2,0,l2_big0,12,AllKernels + 2); 
+  Dense2(l2_big1,L2_W_2,10,L2_B_2,0,l2_big0,12,AllKernels + 2);
 #endif
 
   rt_perf_stop(perf);
   rt_perf_save(perf);
   instr[2] = rt_perf_get(perf, RT_PERF_INSTR) - instr[0] - instr[1];
-  ElapsedTime[2] = rt_perf_get(perf,RT_PERF_CYCLES)- ElapsedTime[0] - ElapsedTime[1]; 
-  
+  ElapsedTime[2] = rt_perf_get(perf,RT_PERF_CYCLES)- ElapsedTime[0] - ElapsedTime[1];
+
 #ifdef DUMP_LAYER
   table_print_data_t(L2_B_2,12,12,"dense bias ");
 #ifdef W_HALFCHAR
@@ -245,7 +245,7 @@ void cnn_process (rt_perf_t *cluster_perf) {
   printf("Layer1: %7d Cycles, %7d instruments\n", ElapsedTime[1], instr[1]);
   printf("Layer2: %7d Cycles, %7d instruments\n", ElapsedTime[2], instr[2]);
   printf(" ============> CNN power consumption at 1.2V : %d µWatt (at 1V %d µWatt)\n\n", (int)((float)(1/(50000000.f/TotalElapsed)) * POWERCNN1_2), (int)((float)(1/(50000000.f/TotalElapsed)) * POWERCNN1  ));
-} 
+}
 
 
 
@@ -259,7 +259,7 @@ void table_print_data_ref(short int * pt, short int * ref, int dim, int packet, 
     if (!(i%packet)) printf("\nindex=%d %s\t", i, s);
     diff = Abs(*(pt+i) - *(ref+i));
     if (diff>diffmax) {diffmax=diff;val=*(pt+i);}
-				   
+
     printf("%x(%x) ", *(pt+i), *(ref+i));
   }
   printf("DIFF MAX %x (%x)\n",diffmax,val);
@@ -295,11 +295,11 @@ void table_print_data_t(short int * pt, int dim, int packet, char *s)
 
 static void cluster_main(rt_perf_t *perf)
 {
-  
+
 #ifdef RT_HAS_HWCE
     /* Make HWCE event active */
     printf("CNN launched on the HWCE\n");
-    eu_evt_maskSet(1<<ARCHI_EVT_ACC0);
+    eu_evt_maskSet(1<<ARCHI_CL_EVT_ACC0);
 #endif
 
 #ifndef RT_HAS_HWCE
@@ -350,7 +350,7 @@ void compute_mfcc( ) {
 	       lastsmp = (i==0)?0:InSignal[i-1];
 	       maxin=0;
 	       for (j=0;j<FRAME;j++) if (Abs(InSignal[i+j])>maxin) maxin=Abs(InSignal[i+j]);
-	       
+
 	       shift = gap8_fl1(maxin);
 
 	       if (shift<=13) shift = (15-shift-2); else shift=0;
@@ -358,7 +358,7 @@ void compute_mfcc( ) {
 #ifdef PRINTINT
 	       printf("shift %d max %x\n",shift,maxin);
 #endif
-	       
+
 	       PreEmphasis(InSignal+i , Frame, FRAME,lastsmp,shift);
 
 #ifdef PRINTDEB
@@ -379,7 +379,7 @@ void compute_mfcc( ) {
 		  if (!((j+1)%10)) printf("\n");
 		}
 #endif
-		
+
 		Radix2FFT_DIF_args((short int*)W_Frame,  TwiddlesLUT, N_FFT);
 
 		SwapSamples_args(W_Frame,SwapLUT,N_FFT);
@@ -438,14 +438,14 @@ void compute_mfcc( ) {
 		// coeff 6.10, data 18.14  * 1/512 => 26
 		DumpInt_norm("Filtered power", MFCC_BASE, MFCC_BANK_CNT, FrameCount, 9+24+2*shift,MFCC_FilterBank  );
 #endif
-		
+
 		// 8.24
 		Compute_log(MFCC_BASE);
 
 		for (j=0;j<MFCC_BANK_CNT;j++) {
 		  MFCC_BASE[j] -= 2*shift*GAPLOG2;
 		}
-		
+
 #ifdef PRINTDEB
 		DumpInt("LOG Filtered Power", MFCC_BASE, MFCC_BANK_CNT, FrameCount, QN);
 #endif
@@ -458,7 +458,7 @@ void compute_mfcc( ) {
 		if (shift<=15) shift=0; else shift = shift-14;
 		if (shift) rnd = 1<<(shift-1);
 
-		v2s * in_dct = (v2s *) MFCC_BASE; 
+		v2s * in_dct = (v2s *) MFCC_BASE;
 
 		for (j=0;j<MFCC_BANK_CNT;j++) {
 		  // convert int to v2s with Im=0
@@ -469,8 +469,8 @@ void compute_mfcc( ) {
 
 		// pad with 0
 		memset(in_dct+MFCC_BANK_CNT,0,(2*NDCT-MFCC_BANK_CNT)*sizeof(v2s));
-		
-		// in_dct 6.10 
+
+		// in_dct 6.10
 		//for (j=0;j<MFCC_BANK_CNT;j++) in_dct[j][0]=(short int) MFCC_BASE[j];
 		//float out_dct_f[NDCT];
 		//dct(in_dct,64,out_dct_f,10);
@@ -489,11 +489,11 @@ void compute_mfcc( ) {
 		// NORMDCT Q15
 		in_dct[0][0] = (in_dct[0][0] * NORMDCT) >> 15;
 		for(j=0;j<64;j++) in_dct[j][0] = (in_dct[j][0] * NORMDCT) >> 15;
-		
+
 		int *LIFTED = (int*) in_dct;
 
 		for(j=0;j<NUMCEP;j++) LIFTED[j] = (int) in_dct[j][0];
-		
+
 #ifdef PRINTDEB
 		DumpInt("DCT", LIFTED, MFCC_BANK_CNT, FrameCount, 6+(14-shift));
 		//for (j=1; j<NUMCEP; j++) printf("lift coeff[%d] = %f\n",j,lift_coeff[j]/(float) (1<<11));
@@ -502,7 +502,7 @@ void compute_mfcc( ) {
 		for (j=0; j<NUMCEP; j++) LIFTED[j] = (lift_coeff[j]*LIFTED[j]) >> (19-shift);
 
 		// replace first coeff by log of frame energy (which is in QN)
-		// energy is QN  
+		// energy is QN
 		LIFTED[0] = energy>>(QN-12);
 
 #ifdef PRINTDEB
@@ -520,7 +520,7 @@ void compute_mfcc( ) {
 		for (j=0; j<NUMCEP; j++)
 		  FEAT_LIST[FrameCount*NUMCEP + j] = (short int) (LIFTED[j]>>(12));
 
-		
+
 		FrameCount++;
 
 
@@ -537,7 +537,7 @@ int main()
 #define Max(a, b)	(((a)>=(b))?(a):(b))
  char error =0;
  int j;
- 
+
  rt_perf_t *cluster_perf;
  rt_event_sched_t sched;
  rt_event_sched_init(&sched);
@@ -559,8 +559,8 @@ int main()
 
  Frame = rt_alloc(RT_ALLOC_FC_DATA,FRAME*sizeof(short int));
  W_Frame = rt_alloc(RT_ALLOC_FC_DATA,(N_FFT+4)*sizeof(v2s));
- 
-#ifdef DOMFCC 
+
+#ifdef DOMFCC
  rt_perf_init(perf);
  rt_perf_conf(perf, (1<<RT_PERF_CYCLES));
  rt_perf_reset(perf);
@@ -583,14 +583,14 @@ int main()
 #else
  printf("CNN on datatest.h\n");
  pfeat_list = (short int*) &(DataIn[0]);
- 
+
 #endif
 //======================CNN
 // Allocate the memory of L2 for the performance structure
   cluster_perf = rt_alloc(RT_ALLOC_L2_CL_DATA, sizeof(rt_perf_t));
   if (cluster_perf == NULL) return -1;
 
- 
+
  L1_Memory  = rt_alloc(RT_ALLOC_CL_DATA, _L1_Memory_SIZE_big) ;
  if(L1_Memory == NULL) {
    printf("WorkingArea alloc error\n");
@@ -600,7 +600,7 @@ int main()
  // allocate data buffers
  l2_big0 = rt_alloc(RT_ALLOC_L2_CL_DATA, BUF0_SIZE*sizeof(short int));
  l2_big1 = rt_alloc(RT_ALLOC_L2_CL_DATA, BUF1_SIZE*sizeof(short int));
- 
+
  if (perf == NULL) return -1;
 
 
@@ -610,7 +610,7 @@ int main()
  //rt_event_wait(pippo);
 
  rt_cluster_mount(UNMOUNT, CID, 0, NULL);
- 
+
  {
      //  ******************************** Softmax on FC ****************************
      int i;
@@ -633,14 +633,14 @@ int main()
        if (l2_big0[i]>max) {max=l2_big0[i];idx_max=i;}
 #endif
      }
- 
+
 
      printf("\nfound max %d\n",idx_max+1);
      printf("\nfound word %s\n",word_list[idx_max]);
 
      rt_free(RT_ALLOC_L2_CL_DATA, (void *)l2_big0, BUF0_SIZE*sizeof(short int));
      rt_free(RT_ALLOC_L2_CL_DATA, (void *)l2_big1, BUF1_SIZE*sizeof(short int));
-     
+
 #ifdef CHECK_CHECKSUM
      if((sum == CHECKSUM)) {
        printf("CHECKSUM OK!!! (%d)\n", sum);

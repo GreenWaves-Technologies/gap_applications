@@ -1,27 +1,35 @@
+/*
+ * Copyright (C) 2017 GreenWaves Technologies
+ * All rights reserved.
+ *
+ * This software may be modified and distributed under the terms
+ * of the BSD license.  See the LICENSE file for details.
+ *
+ */
+
 #include <stdint.h>
 #include <stdio.h>
 #include "AutoTilerLib.h"
-#include "StdTypes.h"
 
 void LoadHOGLibrary()
 
 {
 	LibKernel("KerProcessCellLine", CALL_PARALLEL,
                CArgs(5,
-			TCArg("Wordu8 * __restrict__", "In"),
-			TCArg("Wordu32", "W"),
-			TCArg("Wordu16 ** __restrict__", "CellLines"),
-			TCArg("Wordu32", "CellLineIndex"),
-			TCArg("Wordu32", "CellLineCount")
+			TCArg("uint8_t * __restrict__", "In"),
+			TCArg("uint32_t", "W"),
+			TCArg("uint16_t ** __restrict__", "CellLines"),
+			TCArg("uint32_t", "CellLineIndex"),
+			TCArg("uint32_t", "CellLineCount")
 
 		),
 		"KerProcessCellLine_ArgT"
 	);
 	LibKernel("KerProcessBlockLine", CALL_PARALLEL,
 		CArgs(3,
-			TCArg("Wordu16 ** __restrict__", "CellLines"),
-			TCArg("Wordu32", "W"),
-			TCArg("Wordu16 * __restrict__", "HOGFeatures")
+			TCArg("uint16_t ** __restrict__", "CellLines"),
+			TCArg("uint32_t", "W"),
+			TCArg("uint16_t * __restrict__", "HOGFeatures")
 		),
 		"KerProcessBlockLine_ArgT"
 	);
@@ -29,63 +37,63 @@ void LoadHOGLibrary()
 
 	LibKernel("KerReadHoGFeatCol", CALL_PARALLEL,
                CArgs(6,
-			TCArg("Wordu16 * __restrict__", "In"),
-			TCArg("Wordu32", "H"),
-			TCArg("Wordu32", "FeatureSize"),
-			TCArg("Wordu32", "EstimWidth"),
-			TCArg("Wordu16 ** __restrict__", "HoGFeatCols"),
-			TCArg("Wordu32", "HoGFeatColIndex")
+			TCArg("uint16_t * __restrict__", "In"),
+			TCArg("uint32_t", "H"),
+			TCArg("uint32_t", "FeatureSize"),
+			TCArg("uint32_t", "EstimWidth"),
+			TCArg("uint16_t ** __restrict__", "HoGFeatCols"),
+			TCArg("uint32_t", "HoGFeatColIndex")
 		),
 		"KerReadHoGFeatCol_ArgT"
 	);
 
 	LibKernel("KerEstimate", CALL_PARALLEL,
                CArgs(6,
-			TCArg("Wordu16 ** __restrict__", "HoGFeatCols"),
-			TCArg("Wordu32", "FeatureSize"),
-			TCArg("Wordu32", "WEstimator"),
-			TCArg("Wordu32", "HEstimator"),
-			TCArg("Wordu32", "HFeatCols"),
-			TCArg("Wordu32 * __restrict__", "Out")
+			TCArg("uint16_t ** __restrict__", "HoGFeatCols"),
+			TCArg("uint32_t", "FeatureSize"),
+			TCArg("uint32_t", "WEstimator"),
+			TCArg("uint32_t", "HEstimator"),
+			TCArg("uint32_t", "HFeatCols"),
+			TCArg("uint32_t * __restrict__", "Out")
 
 		),
 		"KerEstimate_ArgT"
 	);
 	LibKernel("KerEstimateWin", CALL_SEQUENTIAL,
 		CArgs(7,
-        		TCArg("Wordu16 ** __restrict__", "HoGFeatCols"),
-        		TCArg("Wordu32", "FeatureSize"),
-        		TCArg("Wordu32", "WEstimator"),
-        		TCArg("Wordu32", "HEstimator"),
-        		TCArg("Wordu32", "HFeatCols"),
-        		TCArg("Wordu32 * __restrict__", "Out"),
-        		TCArg("Wordu16 * __restrict__", "Buffer")
+        		TCArg("uint16_t ** __restrict__", "HoGFeatCols"),
+        		TCArg("uint32_t", "FeatureSize"),
+        		TCArg("uint32_t", "WEstimator"),
+        		TCArg("uint32_t", "HEstimator"),
+        		TCArg("uint32_t", "HFeatCols"),
+        		TCArg("uint32_t * __restrict__", "Out"),
+        		TCArg("uint16_t * __restrict__", "Buffer")
 		),
 		""
 	);
 	LibKernel("KerWeakEstimateWin", CALL_SEQUENTIAL,
 		CArgs(9,
-        		TCArg("Wordu16 ** __restrict__", "HoGFeatCols"),
-        		TCArg("Wordu32", "FeatureSize"),
-        		TCArg("Wordu32", "WEstimator"),
-        		TCArg("Wordu32", "HEstimator"),
-        		TCArg("Wordu32", "HFeatCols"),
-        		TCArg("Wordu8 * __restrict__", "Out"),
-        		TCArg("Wordu16 * __restrict__", "Buffer"),
+        		TCArg("uint16_t ** __restrict__", "HoGFeatCols"),
+        		TCArg("uint32_t", "FeatureSize"),
+        		TCArg("uint32_t", "WEstimator"),
+        		TCArg("uint32_t", "HEstimator"),
+        		TCArg("uint32_t", "HFeatCols"),
+        		TCArg("uint8_t * __restrict__", "Out"),
+        		TCArg("uint16_t * __restrict__", "Buffer"),
 			TCArg("HoGWeakPredictor_T * __restrict__","Model"),
-			TCArg("Wordu32", "ModelSize")
+			TCArg("uint32_t", "ModelSize")
 		),
 		""
 	);
 	LibKernel("KerWeakEstimateAllWindows", CALL_PARALLEL,
 		CArgs(7,
-			TCArg("Wordu16 ** __restrict__", "HoGFeatCols"),
-			TCArg("Wordu32", "ColumnIndexM1"),
-			TCArg("Wordu32", "HEstimator"),
-			TCArg("Wordu32", "HFeatCols"),
-			TCArg("Wordu32", "FeatureSize"),
+			TCArg("uint16_t ** __restrict__", "HoGFeatCols"),
+			TCArg("uint32_t", "ColumnIndexM1"),
+			TCArg("uint32_t", "HEstimator"),
+			TCArg("uint32_t", "HFeatCols"),
+			TCArg("uint32_t", "FeatureSize"),
 			TCArg("HoGWeakPredictorBis_T * __restrict__", "Model"),
-			TCArg("Wordu32", "ModelSize")
+			TCArg("uint32_t", "ModelSize")
 		),
 		"KerWeakEstimate_ArgT"
 	);
@@ -139,9 +147,9 @@ void GenerateHOG(char *Name,
 		KernelIterationOrder(KER_DIM2, KER_TILE),
 		TILE_HOR,
 		CArgs(3,
-			TCArg("Wordu8 *  __restrict__",  "ImageIn"),
-			TCArg("Wordu16 ** __restrict__", "CellLines"),
-			TCArg("Wordu16 *  __restrict__", "HOGFeatures")
+			TCArg("uint8_t *  __restrict__",  "ImageIn"),
+			TCArg("uint16_t ** __restrict__", "CellLines"),
+			TCArg("uint16_t *  __restrict__", "HOGFeatures")
 		),
 		Calls(2,
 			Call("KerProcessCellLine", LOC_INNER_LOOP,
@@ -173,9 +181,9 @@ void GenerateHOG(char *Name,
 		KernelIterationOrder(KER_DIM2, KER_TILE),
 		TILE_HOR,
 		CArgs(3,
-			TCArg("Wordu8 *  __restrict__",  "ImageIn"),
-			TCArg("Wordu16 ** __restrict__", "CellLines"),
-			TCArg("Wordu16 *  __restrict__", "HOGFeatures")
+			TCArg("uint8_t *  __restrict__",  "ImageIn"),
+			TCArg("uint16_t ** __restrict__", "CellLines"),
+			TCArg("uint16_t *  __restrict__", "HOGFeatures")
 		),
 		Calls(2,
 			Call("KerProcessCellLine", LOC_INNER_LOOP,
@@ -205,11 +213,11 @@ void GenerateHOG(char *Name,
 	CloseKernelGroup();
 	UserKernelGroup(Name,
 		CArgs(5,
-			TCArg("Wordu8 *  __restrict__", "ImageIn"),
-			TCArg("Wordu16 **  __restrict__", "CellLines"),
-			TCArg("Wordu16 *  __restrict__", "HOGFeatures"),
-			TCArg("Wordu32", "OneFullBlockLineOffset"),
-			TCArg("Wordu32", "OneFullHoGFeatureLineOffset")
+			TCArg("uint8_t *  __restrict__", "ImageIn"),
+			TCArg("uint16_t **  __restrict__", "CellLines"),
+			TCArg("uint16_t *  __restrict__", "HOGFeatures"),
+			TCArg("uint32_t", "OneFullBlockLineOffset"),
+			TCArg("uint32_t", "OneFullHoGFeatureLineOffset")
 		),
 		Calls(2,
 			UserKernelCall(AppendNames("Prime", Name), LOC_GROUP,
@@ -254,12 +262,12 @@ void GenerateWeakHOGEstimator(
 
 	unsigned int KhE = ((HEstimPix)/CellSize - BlockSize)/(BlockSize - BlockOverlap);
 	unsigned int KwE = ((WEstimPix)/CellSize - BlockSize)/(BlockSize - BlockOverlap);
-	
+
 	unsigned int WEstim = 1 + KwE;	/* Width of Estim window in HoG Features */
 	unsigned int HEstim = 1 + KhE;	/* Height of Estim window in HoG Features */
 
 	if (W<WEstimPix || H<HEstimPix) GenTilingError("Image size [%d x %d] must be larger than estimation window [%d x %d]\n", W, H, WEstimPix, HEstimPix);
-	
+
 	printf("Generating HOG Based Estimator, Weak Estimator Version:\n");
 	printf("\tHOG Features       [%3d x %3d] from Image [%3d x %3d]\n", Whf, Hhf, W, H);
 	printf("\tEstimation Window: [%3d x %3d] pixels or  [%3d x %3d] HOG features\n", WEstimPix, HEstimPix, WEstim, HEstim);
@@ -273,12 +281,12 @@ void GenerateWeakHOGEstimator(
 		KernelIterationOrder(KER_DIM2, KER_TILE),
 		TILE_VER,
 		CArgs(6,
-			TCArg("Wordu16 * __restrict__",  "HoGFeatIn"),
-			TCArg("Wordu16 ** __restrict__", "HoGFeatCols"),
-			TCArg("Wordu32", "HFeat"),
-			TCArg("Wordu8 *  __restrict__", "Out"),
+			TCArg("uint16_t * __restrict__",  "HoGFeatIn"),
+			TCArg("uint16_t ** __restrict__", "HoGFeatCols"),
+			TCArg("uint32_t", "HFeat"),
+			TCArg("uint8_t *  __restrict__", "Out"),
 			TCArg("HoGWeakPredictor_T * __restrict__", "Model"),
-			TCArg("Wordu32", "ModelSize")
+			TCArg("uint32_t", "ModelSize")
 		),
 		Calls(2,
 			Call("KerReadHoGFeatCol", LOC_INNER_LOOP,
@@ -318,12 +326,12 @@ void GenerateWeakHOGEstimator(
 		KernelIterationOrder(KER_DIM2, KER_TILE),
 		TILE_VER,
 		CArgs(6,
-			TCArg("Wordu16 * __restrict__",  "HoGFeatIn"),
-			TCArg("Wordu16 ** __restrict__", "HoGFeatCols"),
-			TCArg("Wordu32", "HFeat"),
-			TCArg("Wordu8 *  __restrict__", "Out"),
+			TCArg("uint16_t * __restrict__",  "HoGFeatIn"),
+			TCArg("uint16_t ** __restrict__", "HoGFeatCols"),
+			TCArg("uint32_t", "HFeat"),
+			TCArg("uint8_t *  __restrict__", "Out"),
 			TCArg("HoGWeakPredictor_T * __restrict__", "Model"),
-			TCArg("Wordu32", "ModelSize")
+			TCArg("uint32_t", "ModelSize")
 		),
 		Calls(2,
 			Call("KerReadHoGFeatCol", LOC_INNER_LOOP,
@@ -359,12 +367,12 @@ void GenerateWeakHOGEstimator(
 	CloseKernelGroup();
 	UserKernelGroup(Name,
 		CArgs(6,
-			TCArg("Wordu16 *  __restrict__", "HoGFeatIn"),
-			TCArg("Wordu16 **  __restrict__", "HoGFeatCols"),
-			TCArg("Wordu32", "HFeat"),
-			TCArg("Wordu8 *  __restrict__", "Out"),
+			TCArg("uint16_t *  __restrict__", "HoGFeatIn"),
+			TCArg("uint16_t **  __restrict__", "HoGFeatCols"),
+			TCArg("uint32_t", "HFeat"),
+			TCArg("uint8_t *  __restrict__", "Out"),
 			TCArg("HoGWeakPredictor_T * __restrict__", "Model"),
-			TCArg("Wordu32", "ModelSize")
+			TCArg("uint32_t", "ModelSize")
 		),
 		Calls(2,
 			UserKernelCall(AppendNames("Prime", Name), LOC_GROUP,
@@ -407,12 +415,12 @@ void GenerateWeakHOGEstimatorBis(
 
 	unsigned int KhE = ((HEstimPix)/CellSize - BlockSize)/(BlockSize - BlockOverlap);
 	unsigned int KwE = ((WEstimPix)/CellSize - BlockSize)/(BlockSize - BlockOverlap);
-	
+
 	unsigned int WEstim = 1 + KwE;	/* Width of Estim window in HoG Features */
 	unsigned int HEstim = 1 + KhE;	/* Height of Estim window in HoG Features */
 
 	if (W<WEstimPix || H<HEstimPix) GenTilingError("Image size [%d x %d] must be larger than estimation window [%d x %d]\n", W, H, WEstimPix, HEstimPix);
-	
+
 	printf("Generating HOG Based Estimator, Weak Estimator Version:\n");
 	printf("\tHOG Features       [%3d x %3d] from Image [%3d x %3d]\n", Whf, Hhf, W, H);
 	printf("\tEstimation Window: [%3d x %3d] pixels or  [%3d x %3d] HOG features\n", WEstimPix, HEstimPix, WEstim, HEstim);
@@ -426,11 +434,11 @@ void GenerateWeakHOGEstimatorBis(
 		KernelIterationOrder(KER_DIM2, KER_TILE),
 		TILE_VER,
 		CArgs(5,
-			TCArg("Wordu16 * __restrict__",  "HoGFeatIn"),
-			TCArg("Wordu16 ** __restrict__", "HoGFeatCols"),
-			TCArg("Wordu32", "HFeat"),
+			TCArg("uint16_t * __restrict__",  "HoGFeatIn"),
+			TCArg("uint16_t ** __restrict__", "HoGFeatCols"),
+			TCArg("uint32_t", "HFeat"),
 			TCArg("HoGWeakPredictorBis_T * __restrict__", "Model"),
-			TCArg("Wordu32", "ModelSize")
+			TCArg("uint32_t", "ModelSize")
 		),
 		Calls(2,
 			Call("KerReadHoGFeatCol", LOC_INNER_LOOP,
@@ -462,11 +470,11 @@ void GenerateWeakHOGEstimatorBis(
 		KernelIterationOrder(KER_DIM2, KER_TILE),
 		TILE_VER,
 		CArgs(5,
-			TCArg("Wordu16 * __restrict__",  "HoGFeatIn"),
-			TCArg("Wordu16 ** __restrict__", "HoGFeatCols"),
-			TCArg("Wordu32", "HFeat"),
+			TCArg("uint16_t * __restrict__",  "HoGFeatIn"),
+			TCArg("uint16_t ** __restrict__", "HoGFeatCols"),
+			TCArg("uint32_t", "HFeat"),
 			TCArg("HoGWeakPredictorBis_T * __restrict__", "Model"),
-			TCArg("Wordu32", "ModelSize")
+			TCArg("uint32_t", "ModelSize")
 		),
 		Calls(2,
 			Call("KerReadHoGFeatCol", LOC_INNER_LOOP,
@@ -496,11 +504,11 @@ void GenerateWeakHOGEstimatorBis(
 	CloseKernelGroup();
 	UserKernelGroup(Name,
 		CArgs(5,
-			TCArg("Wordu16 *  __restrict__", "HoGFeatIn"),
-			TCArg("Wordu16 **  __restrict__", "HoGFeatCols"),
-			TCArg("Wordu32", "HFeat"),
+			TCArg("uint16_t *  __restrict__", "HoGFeatIn"),
+			TCArg("uint16_t **  __restrict__", "HoGFeatCols"),
+			TCArg("uint32_t", "HFeat"),
 			TCArg("HoGWeakPredictorBis_T * __restrict__", "Model"),
-			TCArg("Wordu32", "ModelSize")
+			TCArg("uint32_t", "ModelSize")
 		),
 		Calls(2,
 			UserKernelCall(AppendNames("Prime", Name), LOC_GROUP,
@@ -517,14 +525,14 @@ void GenerateWeakHOGEstimatorBis(
 void HOGEstimDependencies()
 
 {
-        SetUsedFilesNames("KernelLibStdTypes.h", 2, "HoGBasicKernels.h", "HoGEstimBasicKernels.h");
+        SetUsedFilesNames(0, 2, "HoGBasicKernels.h", "HoGEstimBasicKernels.h");
 }
 
 void HOGEstimConfiguration(unsigned int L1Memory)
 
 {
-        // SetInlineMode(ALWAYS_INLINE);
-	SetInlineMode(NEVER_INLINE);
+         SetInlineMode(ALWAYS_INLINE);
+	//SetInlineMode(NEVER_INLINE);
 	SetSymbolNames("HOG_L1_Memory", "HOG_L2_Memory", "HOG_KernelDescr", "HOG_KernelArgs");
         SetSymbolDynamics();
 	SetKernelOpts(KER_OPT_NONE, KER_OPT_BUFFER_PROMOTE);

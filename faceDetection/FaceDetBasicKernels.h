@@ -11,7 +11,6 @@
 #define __IIBASICKERNELS_H__
 
 #include "Gap8.h"
-#include "StdTypes.h"
 #include "cascade.h"
 
 #define Max(a, b)               (((a)>(b))?(a):(b))
@@ -31,18 +30,18 @@ typedef struct {
 void KerResizeBilinear(KerResizeBilinear_ArgT *KerArg);
 
 typedef struct {
-	Wordu32 * __restrict__ KerBuffer;
-	Wordu32 W;
+	unsigned int * __restrict__ KerBuffer;
+	unsigned int W;
 } KerPrimeImage_ArgT;
 
 void KerIntegralImagePrime(KerPrimeImage_ArgT *KerArg);
 
 typedef struct {
-	Wordu8 * __restrict__ In;
-	Wordu32 W;
-	Wordu32 H;
-	Wordu32 * __restrict__ IntegralImage;
-	Wordu32 * __restrict__ KerBuffer;
+	unsigned char * __restrict__ In;
+	unsigned int W;
+	unsigned int H;
+	unsigned int * __restrict__ IntegralImage;
+	unsigned int * __restrict__ KerBuffer;
 } KerProcessImage_ArgT;
 
 void KerIntegralImageProcess(KerProcessImage_ArgT *KerArg);
@@ -51,14 +50,14 @@ void KerIntegralImageProcess(KerProcessImage_ArgT *KerArg);
 void KerSquaredIntegralImageProcess(KerProcessImage_ArgT *KerArg);
 
 typedef struct {
-	Wordu32 * __restrict__ IntegralImage;
-	Wordu32 * __restrict__ SquaredIntegralImage;
-	Wordu32 W;
-	Wordu32 H;
+	unsigned int * __restrict__ IntegralImage;
+	unsigned int * __restrict__ SquaredIntegralImage;
+	unsigned int W;
+	unsigned int H;
 	void * cascade_model;
-	Wordu8 WinW;
-	Wordu8 WinH;
-	Wordu8 * __restrict__ CascadeReponse;
+	unsigned char WinW;
+	unsigned char WinH;
+	unsigned char * __restrict__ CascadeReponse;
 } KerEvaluateCascade_ArgT;
 
 
@@ -76,13 +75,13 @@ typedef struct{
 } eval_weak_classifier_Arg_T;
 
 void KerEvaluateCascade(
-	Wordu32 * __restrict__ IntegralImage,
-	Wordu32 * __restrict__ SquaredIntegralImage,
-	Wordu32 W,
-	Wordu32 H,
+	unsigned int * __restrict__ IntegralImage,
+	unsigned int * __restrict__ SquaredIntegralImage,
+	unsigned int W,
+	unsigned int H,
 	void * cascade_model,
-	Wordu8 WinW,
-	Wordu8 WinH,
-	Word32 * __restrict__ CascadeReponse);
+	unsigned char WinW,
+	unsigned char WinH,
+	int * __restrict__ CascadeReponse);
 
 #endif //__IIBASICKERNELS_H__

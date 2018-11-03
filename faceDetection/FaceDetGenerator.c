@@ -10,37 +10,36 @@
 #include <stdint.h>
 #include <stdio.h>
 #include "AutoTilerLib.h"
-#include "StdTypes.h"
 
 void LoadFaceDetectionLibrary()
 {
 	LibKernel("KerResizeBilinear", CALL_PARALLEL,
-		CArgs(8, 
-			TCArg("unsigned char * __restrict__", "In"),  
-			TCArg("unsigned int", "Win"),  
+		CArgs(8,
+			TCArg("unsigned char * __restrict__", "In"),
+			TCArg("unsigned int", "Win"),
 			TCArg("unsigned int", "Hin"),
-			TCArg("unsigned char * __restrict__", "Out"), 
-			TCArg("unsigned int", "Wout"), 
+			TCArg("unsigned char * __restrict__", "Out"),
+			TCArg("unsigned int", "Wout"),
 			TCArg("unsigned int", "Hout"),
-			TCArg("unsigned int", "HTileOut"),            
+			TCArg("unsigned int", "HTileOut"),
 			TCArg("unsigned int", "FirstLineIndex")),
 		"KerResizeBilinear_ArgT"
 	);
 
 	LibKernel("KerIntegralImagePrime", CALL_PARALLEL,
             CArgs(2,
-            TCArg("Wordu32 * __restrict__", "KerBuffer"),
-			TCArg("Wordu32", "W")
+            TCArg("unsigned int * __restrict__", "KerBuffer"),
+			TCArg("unsigned int", "W")
 		),
 		"KerPrimeImage_ArgT"
 	);
 	LibKernel("KerIntegralImageProcess", CALL_PARALLEL,
                CArgs(5,
-			TCArg("Wordu8 * __restrict__", "In"),
-			TCArg("Wordu32", "W"),
-			TCArg("Wordu32", "H"),
-			TCArg("Wordu32 * __restrict__", "IntegralImage"),
-			TCArg("Wordu32 * __restrict__", "KerBuffer")
+			TCArg("unsigned char * __restrict__", "In"),
+			TCArg("unsigned int", "W"),
+			TCArg("unsigned int", "H"),
+			TCArg("unsigned int * __restrict__", "IntegralImage"),
+			TCArg("unsigned int * __restrict__", "KerBuffer")
 
 		),
 		"KerProcessImage_ArgT"
@@ -49,11 +48,11 @@ void LoadFaceDetectionLibrary()
 
 	LibKernel("KerSquaredIntegralImageProcess", CALL_PARALLEL,
                CArgs(5,
-			TCArg("Wordu8 * __restrict__", "In"),
-			TCArg("Wordu32", "W"),
-			TCArg("Wordu32", "H"),
-			TCArg("Wordu32 * __restrict__", "IntegralImage"),
-			TCArg("Wordu32 * __restrict__", "KerBuffer")
+			TCArg("unsigned char * __restrict__", "In"),
+			TCArg("unsigned int", "W"),
+			TCArg("unsigned int", "H"),
+			TCArg("unsigned int * __restrict__", "IntegralImage"),
+			TCArg("unsigned int * __restrict__", "KerBuffer")
 
 		),
 		"KerProcessImage_ArgT"
@@ -61,14 +60,14 @@ void LoadFaceDetectionLibrary()
 
 	LibKernel("KerEvaluateCascade", CALL_SEQUENTIAL,
             CArgs(8,
-			TCArg("Wordu32 * __restrict__", "IntegralImage"),
-			TCArg("Wordu32 * __restrict__", "SquaredIntegralImage"),
-			TCArg("Wordu32", "W"),
-			TCArg("Wordu32", "H"),
+			TCArg("unsigned int * __restrict__", "IntegralImage"),
+			TCArg("unsigned int * __restrict__", "SquaredIntegralImage"),
+			TCArg("unsigned int", "W"),
+			TCArg("unsigned int", "H"),
 			TCArg("void *","cascade_model"),
-			TCArg("Wordu8","WinW"),
-			TCArg("Wordu8","WinH"),
-			TCArg("Word32 * __restrict__", "CascadeReponse")
+			TCArg("unsigned char","WinW"),
+			TCArg("unsigned char","WinH"),
+			TCArg("int * __restrict__", "CascadeReponse")
 		),
 		"KerEvaluateCascade_ArgT"
 	);
@@ -83,12 +82,12 @@ void GenerateResize(char *Name, int Wi, int Hi, int Wo, int Ho)
 		TILE_HOR,
 		CArgs(2, TCArg("unsigned char *", "In"), TCArg("unsigned char *", "Out")),
 		Calls(1, Call("KerResizeBilinear", LOC_INNER_LOOP,
-			Bindings(8, K_Arg("In", KER_ARG_TILE),  
-				        K_Arg("In", KER_ARG_W), 
+			Bindings(8, K_Arg("In", KER_ARG_TILE),
+				        K_Arg("In", KER_ARG_W),
 				        K_Arg("In", KER_ARG_H),
-				        K_Arg("Out", KER_ARG_TILE), 
-				        K_Arg("Out", KER_ARG_W), 
-				        K_Arg("Out", KER_ARG_H), 
+				        K_Arg("Out", KER_ARG_TILE),
+				        K_Arg("Out", KER_ARG_W),
+				        K_Arg("Out", KER_ARG_H),
 				        K_Arg("Out", KER_ARG_TILE_H),
 				        K_Arg("In", KER_ARG_TILE_BASE)))),
 		KerArgs(2,
@@ -110,8 +109,8 @@ void GenerateIntegralImage(char *Name,
 		KernelIterationOrder(1, KER_TILE),
 		TILE_HOR,
 		CArgs(2,
-			TCArg("Wordu8 *  __restrict__",  "ImageIn"),
-			TCArg("Wordu32 *  __restrict__", "IntegralImage")
+			TCArg("unsigned char *  __restrict__",  "ImageIn"),
+			TCArg("unsigned int *  __restrict__", "IntegralImage")
 		),
 		Calls(2,
 			Call("KerIntegralImagePrime", LOC_INNER_LOOP_PROLOG,
@@ -133,7 +132,7 @@ void GenerateIntegralImage(char *Name,
 			KerArgs(3,
                 KerArg("KerIn",     OBJ_IN_DB,           W,  H, sizeof(char), 0, 0, 0, "ImageIn", 0),
                 KerArg("KerBuffer", O_BUFF | O_NDB | O_NOUT | O_NIN | O_NTILED ,   W,  1, sizeof(int),  0, 0, 0, 0, 0),
-                KerArg("KerOut",    OBJ_OUT_DB,          W,  H, sizeof(int),  0, 0, 0, "IntegralImage", 0) 
+                KerArg("KerOut",    OBJ_OUT_DB,          W,  H, sizeof(int),  0, 0, 0, "IntegralImage", 0)
             )
 	);
 }
@@ -150,8 +149,8 @@ void GenerateSquaredIntegralImage(char *Name,
 		KernelIterationOrder(1, KER_TILE),
 		TILE_HOR,
 		CArgs(2,
-			TCArg("Wordu8 *  __restrict__",  "ImageIn"),
-			TCArg("Wordu32 *  __restrict__", "IntegralImage")
+			TCArg("unsigned char *  __restrict__",  "ImageIn"),
+			TCArg("unsigned int *  __restrict__", "IntegralImage")
 		),
 		Calls(2,
 			Call("KerIntegralImagePrime", LOC_INNER_LOOP_PROLOG,
@@ -173,7 +172,7 @@ void GenerateSquaredIntegralImage(char *Name,
 			KerArgs(3,
                 KerArg("KerIn",     OBJ_IN_DB,           W,  H, sizeof(char), 0, 0, 0, "ImageIn", 0),
                 KerArg("KerBuffer", O_BUFF | O_NDB | O_NOUT | O_NIN | O_NTILED ,   W,  1, sizeof(int),  0, 0, 0, 0, 0),
-                KerArg("KerOut",    OBJ_OUT_DB,          W,  H, sizeof(int),  0, 0, 0, "IntegralImage", 0) 
+                KerArg("KerOut",    OBJ_OUT_DB,          W,  H, sizeof(int),  0, 0, 0, "IntegralImage", 0)
             )
 	);
 }
@@ -188,19 +187,19 @@ void GenerateCascadeClassifier(char *Name,
 	)
 {
 
-	
+
 	UserKernel(AppendNames("Process", Name),
 		KernelDimensions(0, W, H, 0),
 		KernelIterationOrder(1, KER_TILE),
 		TILE_HOR,
 		CArgs(4,
-			TCArg("Wordu32 *  __restrict__",  "IntegralImage"),
-			TCArg("Wordu32 *  __restrict__", "SquaredIntegralImage"),
+			TCArg("unsigned int *  __restrict__",  "IntegralImage"),
+			TCArg("unsigned int *  __restrict__", "SquaredIntegralImage"),
 			TCArg("void * ", "cascade_model"),
-			TCArg("Word32  *  __restrict__", "CascadeReponse")
+			TCArg("int  *  __restrict__", "CascadeReponse")
 		),
 		Calls(1,
-			
+
 			Call("KerEvaluateCascade", LOC_INNER_LOOP,
 				Bindings(8,
 					K_Arg("KerII", KER_ARG_TILE),
@@ -217,7 +216,7 @@ void GenerateCascadeClassifier(char *Name,
 			KerArgs(3,
 				KerArg("KerII",      OBJ_IN_DB,   W,  H, sizeof(unsigned int), WinH-1, 0, 0, "IntegralImage", 0),
 				KerArg("KerIISQ",    OBJ_IN_DB,   W,  H, sizeof(unsigned int), WinH-1, 0, 0, "SquaredIntegralImage", 0),
-				KerArg("KerOut",    OBJ_OUT_DB,   W-WinW+1,  H-WinH+1, sizeof(int),  0, 0, 0, "CascadeReponse", 0) 
+				KerArg("KerOut",    OBJ_OUT_DB,   W-WinW+1,  H-WinH+1, sizeof(int),  0, 0, 0, "CascadeReponse", 0)
             )
 	);
 }
@@ -226,13 +225,13 @@ void GenerateCascadeClassifier(char *Name,
 void FaceDetectionConfiguration(unsigned int L1Memory)
 
 {
-    SetInlineMode(ALWAYS_INLINE); 
+    SetInlineMode(ALWAYS_INLINE);
     //SetInlineMode(NEVER_INLINE);
 	SetSymbolNames("FaceDet_L1_Memory", "FaceDet_L2_Memory", "FaceDet_KernelDescr", "FaceDet_KernelArgs");
     SetSymbolDynamics();
 	SetKernelOpts(KER_OPT_NONE, KER_OPT_BUFFER_PROMOTE);
 
-    SetUsedFilesNames("KernelLibStdTypes.h", 1, "FaceDetBasicKernels.h");
+    SetUsedFilesNames(0, 1, "FaceDetBasicKernels.h");
     SetGeneratedFilesNames("FaceDetKernelsInit.c", "FaceDetKernelsInit.h", "FaceDetKernels.c", "FaceDetKernels.h");
 
     SetL1MemorySize(L1Memory);

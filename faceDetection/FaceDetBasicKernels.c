@@ -364,14 +364,14 @@ static int windows_cascade_classifier(unsigned int* __restrict__ integralImage, 
 
 
 void KerEvaluateCascade(
-    Wordu32 * __restrict__ IntegralImage,
-    Wordu32 * __restrict__ SquaredIntegralImage,
-    Wordu32 W,
-    Wordu32 H,
+    unsigned int * __restrict__ IntegralImage,
+    unsigned int * __restrict__ SquaredIntegralImage,
+    unsigned int W,
+    unsigned int H,
     void * cascade_model,
-    Wordu8 WinW,
-    Wordu8 WinH,
-    Word32 * __restrict__ CascadeReponse){
+    unsigned char WinW,
+    unsigned char WinH,
+    int * __restrict__ CascadeReponse){
 
     cascade_t *model = (cascade_t*) cascade_model;
 

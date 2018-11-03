@@ -7,7 +7,11 @@
 PULP_APP = HoG
 
 TILER_PATH = $(GAP_SDK_HOME)/tools/autotiler
-MODEL_SRC = HoGEstimGenerator.c ResizeGenerator.c HoGEstimModel.c
+TILER_LIB = $(TILER_PATH)/lib/libtile.a
+TILER_INC = $(TILER_PATH)/include
+TILER_GENERATOR_PATH = $(TILER_PATH)/generators
+
+MODEL_SRC = HoGEstimGenerator.c $(TILER_GENERATOR_PATH)/Resize/generator/src/ResizeGenerator.c HoGEstimModel.c
 
 MODEL_GEN = HoGEstimKernelsInit HoGEstimKernels
 MODEL_GEN_C = $(addsuffix .c, $(MODEL_GEN))
@@ -15,12 +19,12 @@ MODEL_GEN_CLEAN = $(MODEL_GEN_C) $(addsuffix .h, $(MODEL_GEN))
 
 RM=rm -f
 
-PULP_APP_SRCS  = HoGEstim.c HoGEstimManage.c ImgIO.c HoGBasicKernels.c HoGEstimBasicKernels.c pad.c ili9341.c ImageDraw.c
-PULP_APP_SRCS += ResizeBasicKernels.c $(MODEL_GEN_C)
+PULP_APP_SRCS  = HoGEstim.c ImgIO.c pad.c ili9341.c ImageDraw.c HoGEstimBasicKernels.c HoGEstimManage.c
+PULP_APP_SRCS += $(TILER_GENERATOR_PATH)/HoG/kernels/src/HoGBasicKernels.c $(TILER_GENERATOR_PATH)/Resize/kernels/src/ResizeBasicKernels.c $(MODEL_GEN_C)
 
 PULP_CFLAGS += -O3
-PULP_CFLAGS += -mno-memcpy -fno-tree-loop-distribute-patterns -fdata-sections -ffunction-sections
-PULP_CFLAGS += -I$(TILER_PATH)/StdTypes/
+PULP_CFLAGS += -mno-memcpy -fno-tree-loop-distribute-patterns -fdata-sections -ffunction-sections -Wno-unused-but-set-variable
+PULP_CFLAGS += -I$(TILER_INC) -I$(TILER_GENERATOR_PATH)/Resize/kernels/include -I$(TILER_GENERATOR_PATH)/HoG/kernels/include
 PULP_LDFLAGS +=  -flto -Wl,--gc-sections
 
 imgOut:
@@ -30,7 +34,7 @@ all:: model imgOut
 
 # Build the code generator
 GenTile:
-	gcc -o GenTile -I$(TILER_PATH)/GenTiling -I$(TILER_PATH)/StdTypes/ $(MODEL_SRC) $(TILER_PATH)/GenTiling/LibTile.a
+	gcc -o GenTile -I$(TILER_INC) -I$(TILER_GENERATOR_PATH)/HoG/kernels/include -I$(TILER_GENERATOR_PATH)/Resize/generator/include $(MODEL_SRC) $(TILER_LIB)
 
 # Run the code generator
 $(MODEL_GEN_C): GenTile

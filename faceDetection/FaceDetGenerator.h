@@ -18,4 +18,21 @@ void FaceDetectionConfiguration(
 	);
 void GenerateResize(char *Name, unsigned int Win, unsigned int Hin, unsigned int Wout, unsigned int Hout);
 
+void GenerateIntegralImage(char *Name,
+		unsigned int W,			/* Image width */
+		unsigned int H 		/* Image Height */
+	);
+
+void GenerateSquaredIntegralImage(char *Name,
+		unsigned int W,			/* Image width */
+		unsigned int H 		/* Image Height */
+	);
+
+void GenerateCascadeClassifier(char *Name,
+		unsigned int W,     /* Image width */
+		unsigned int H,     /* Image Height */
+		unsigned int WinW,  /* Detection window width */
+		unsigned int WinH   /* Detection window Height */
+	);
+
 #endif //__RESIZE_GENERATOR_H__

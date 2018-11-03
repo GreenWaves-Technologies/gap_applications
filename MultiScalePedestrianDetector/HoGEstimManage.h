@@ -12,6 +12,7 @@ int AllocateBBList(
         unsigned int N
 	);
 
+void ResetBBList();
 void DumpBBList();
 
 void DrawBBList(
