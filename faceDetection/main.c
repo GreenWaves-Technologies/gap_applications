@@ -39,6 +39,7 @@ L2_MEM unsigned char *ImageInOUT;
 L2_MEM unsigned char *ImageOut;
 L2_MEM unsigned int *ImageIntegral;
 L2_MEM unsigned int *SquaredImageIntegral;
+L2_MEM unsigned int real_detections=0;
 
 RT_FC_TINY_DATA rt_camera_t *camera1;
 RT_FC_TINY_DATA rt_cam_conf_t cam1_conf;
@@ -607,7 +608,6 @@ static void cluster_main(ArgCluster_T *ArgC)
 	ArgC->cycles = Ti-Ta;
 	#endif
 
-	unsigned int real_detections=0;
 	ArgC->num_reponse=reponse_idx;
 	for(int i=0;i<reponse_idx;i++)
 		if(reponses[i].x!=-1){
@@ -622,13 +622,15 @@ static void cluster_main(ArgCluster_T *ArgC)
 	//ResizeImage_1(ArgC->ImageIn,ArgC->ImageOut,NULL);
 
 
-#if !FROM_FILE
+#if !FROM_FILE && !SAVE_IMAGE
 	//Converting image to RGB 565 for LCD screen and binning image to half the size
 	rt_team_fork(__builtin_pulp_CoreCount(), (void *) gray8_to_RGB565_cluster_half, (void *) ArgC);
 #else
 	#ifdef VERBOSE
-	printf("Total detections: %d \n", real_detections);
-	printf("[W:%d, H:%d] Done in %d cycles at %d cycles per pixel....\n", Win, Hin, Ti, Ti/(Win*Hin));
+    if(real_detections){
+        printf("Total detections: %d \n", real_detections);
+        printf("[W:%d, H:%d] Done in %d cycles at %d cycles per pixel....\n", Win, Hin, Ti, Ti/(Win*Hin));
+    }
 	#endif
 #endif
 }
@@ -771,6 +773,8 @@ int main(int argc, char *argv[])
 
 #if !FROM_FILE && !SAVE_IMAGE
   	while(1){
+#else
+    while(!real_detections){
 #endif
   		//Elaborating input image
 		rt_cluster_call(NULL, CID, (void (*)(void *)) cluster_main, &ClusterCall, stacks, STACK_SIZE, STACK_SIZE, rt_nb_pe(), NULL);
@@ -783,9 +787,9 @@ int main(int argc, char *argv[])
   		//Pushing image to screen
 
   		lcd_pushPixels(spim, LCD_OFF_X, LCD_OFF_Y, W/2,H/2, image16);
+#endif
 
   	}
-#endif
 
 #if SAVE_IMAGE
     Imagefile = "ImgOut.pgm";
