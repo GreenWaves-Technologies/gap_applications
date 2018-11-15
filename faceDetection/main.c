@@ -27,7 +27,7 @@
 #define UNMOUNT         0
 #define CID             0
 
-#define FROM_FILE 1
+#define FROM_FILE 0
 #define SAVE_IMAGE 1
 #define VERBOSE 1
 
@@ -69,7 +69,7 @@ typedef struct ArgCluster {
 	int* output_map;
 	cascade_t* model;
 	unsigned int cycles;
-	rt_perf_t *perf;	
+	rt_perf_t *perf;
 } ArgCluster_T;
 
 
@@ -88,7 +88,7 @@ void camera_cristal_enable(){
 
   gap8SetOnePadAlternate(PLP_PAD_TIMER0_CH0, PLP_PAD_GPIO_ALTERNATE1);
   gap8SetGPIODir(gap8GiveGpioNb(PLP_PAD_TIMER0_CH0), GPIO_DIR_OUT);
-  
+
   gap8WriteGPIO(gap8GiveGpioNb(PLP_PAD_TIMER0_CH0), 0x0);
   rt_time_wait_us(3000);
 
@@ -102,7 +102,7 @@ void GPIO_2_en(){
 
   gap8SetOnePadAlternate(PLP_PAD_TIMER0_CH2, PLP_PAD_GPIO_ALTERNATE1);
   gap8SetGPIODir(gap8GiveGpioNb(PLP_PAD_TIMER0_CH2), GPIO_DIR_OUT);
-  
+
 }
 
 
@@ -264,14 +264,14 @@ static int biggest_cascade_stage(cascade_t *cascade){
 	int cur_layer;
 
 	for (int i=0; i<cascade->stages_num; i++) {
-		
-		cur_layer = sizeof(cascade->stages[i]->stage_size) + 
-					sizeof(cascade->stages[i]->rectangles_size) + 
+
+		cur_layer = sizeof(cascade->stages[i]->stage_size) +
+					sizeof(cascade->stages[i]->rectangles_size) +
 					(cascade->stages[i]->stage_size*
 						(sizeof(cascade->stages[i]->thresholds) +
 						 sizeof(cascade->stages[i]->alpha1) +
 						 sizeof(cascade->stages[i]->alpha2) +
-						 sizeof(cascade->stages[i]->rect_num) 
+						 sizeof(cascade->stages[i]->rect_num)
 						 )
 					) +
 					(cascade->stages[i]->rectangles_size*sizeof(cascade->stages[i]->rectangles)) +
@@ -316,7 +316,7 @@ single_cascade_t* sync_copy_cascade_stage_to_l1(single_cascade_t* cascade_l2){
 	rt_dma_memcpy((unsigned int) cascade_l2->rect_num, (unsigned int) cascade_l1->rect_num, sizeof(unsigned short)*(cascade_l1->stage_size+1), RT_DMA_DIR_EXT2LOC, 0, &DmaR_Evt1);
 	rt_dma_wait(&DmaR_Evt1);
 
-	
+
 	cascade_l1->weights    = (signed char*)rt_alloc( RT_ALLOC_CL_DATA, sizeof(signed char)*(cascade_l2->rectangles_size/4));
 	rt_dma_memcpy((unsigned int) cascade_l2->weights, (unsigned int) cascade_l1->weights, sizeof(signed char)*(cascade_l2->rectangles_size/4), RT_DMA_DIR_EXT2LOC, 0, &DmaR_Evt1);
 	rt_dma_wait(&DmaR_Evt1);
@@ -349,7 +349,7 @@ int rect_intersect_area( unsigned short a_x, unsigned short a_y, unsigned short 
     if(size_x <=0 || size_x <=0)
         return 0;
     else
-        return size_x*size_y; 
+        return size_x*size_y;
 
     #undef MAX
     #undef MIN
@@ -365,7 +365,7 @@ void non_max_suppress(cascade_reponse_t* reponses, int reponse_idx){
         //check if rect has been removed (-1)
         if(reponses[idx].x==-1)
             continue;
- 
+
         for(idx_int=0;idx_int<reponse_idx;idx_int++){
 
             if(reponses[idx_int].x==-1 || idx_int==idx)
@@ -502,7 +502,7 @@ void copy_image(ArgCluster_T *ArgC){
 static void cluster_main(ArgCluster_T *ArgC)
 {
 	//printf ("Cluster master start\n");
-	
+
 	unsigned int Win=ArgC->Win, Hin=ArgC->Hin;
 	unsigned int Wout, Hout;
 
@@ -525,17 +525,17 @@ static void cluster_main(ArgCluster_T *ArgC)
 	gap8_resethwtimer();
 	unsigned int Ta = gap8_readhwtimer();
 	#endif
-	
 
-#ifdef ENABLE_LAYER_1	
+
+#ifdef ENABLE_LAYER_1
 	ResizeImage_1(ArgC->ImageIn,ArgC->ImageOut,NULL);
 	ProcessIntegralImage_1(ArgC->ImageOut,ArgC->ImageIntegral,NULL);
-	ProcessSquaredIntegralImage_1(ArgC->ImageOut,ArgC->SquaredImageIntegral,NULL);	
+	ProcessSquaredIntegralImage_1(ArgC->ImageOut,ArgC->SquaredImageIntegral,NULL);
 	ProcessCascade_1(ArgC->ImageIntegral,ArgC->SquaredImageIntegral,ArgC->model, ArgC->output_map, NULL);
 
 	for(unsigned int i=0;i<Hout-24+1;i+=DETECT_STRIDE)
 		for(unsigned int j=0;j<Wout-24+1;j+=DETECT_STRIDE){
-			
+
 			result = ArgC->output_map[i*(Wout-24+1)+j];
 
 			if(result!=0){
@@ -560,7 +560,7 @@ static void cluster_main(ArgCluster_T *ArgC)
 
 	for(unsigned int i=0;i<Hout-24+1;i+=DETECT_STRIDE)
 		for(unsigned int j=0;j<Wout-24+1;j+=DETECT_STRIDE){
-			
+
 			result = ArgC->output_map[i*(Wout-24+1)+j];
 
 			if(result!=0){
@@ -584,7 +584,7 @@ static void cluster_main(ArgCluster_T *ArgC)
 	ProcessCascade_3(ArgC->ImageIntegral,ArgC->SquaredImageIntegral,ArgC->model, ArgC->output_map, NULL);
 	for(unsigned int i=0;i<Hout-24+1;i+=DETECT_STRIDE)
 		for(unsigned int j=0;j<Wout-24+1;j+=DETECT_STRIDE){
-			
+
 			result = ArgC->output_map[i*(Wout-24+1)+j];
 
 			if(result!=0){
@@ -597,7 +597,7 @@ static void cluster_main(ArgCluster_T *ArgC)
 				//	printf("Face Found in %dx%d at X: %d, Y: %d - value: %d\n",Wout,Hout,j,i,result);
 			}
 	}
-	
+
 #endif
 
 	non_max_suppress(reponses,reponse_idx);
@@ -606,7 +606,7 @@ static void cluster_main(ArgCluster_T *ArgC)
 	unsigned int Ti = gap8_readhwtimer();
 	ArgC->cycles = Ti-Ta;
 	#endif
-	
+
 	unsigned int real_detections=0;
 	ArgC->num_reponse=reponse_idx;
 	for(int i=0;i<reponse_idx;i++)
@@ -644,9 +644,11 @@ int main(int argc, char *argv[])
 	char out_perf_string[120];
 	ArgCluster_T ClusterCall;
 
-#if FROM_FILE
-	char *Imagefile = "img51.pgm";
 	char imageName[64];
+	char *Imagefile;
+
+#if FROM_FILE
+    Imagefile = "img51.pgm";
 	sprintf(imageName, "../../../testImages/%s", Imagefile);
 #endif
 
@@ -669,14 +671,14 @@ int main(int argc, char *argv[])
 	void *stacks = rt_alloc(RT_ALLOC_CL_DATA, STACK_SIZE*rt_nb_pe());
 	if (stacks == NULL) return -1;
 
-	ImageIn              = (unsigned char *) rt_alloc( RT_ALLOC_L2_CL_DATA, W*H*sizeof(unsigned char));	
-	ImageIn1             = (unsigned char *) rt_alloc( RT_ALLOC_L2_CL_DATA, W*H*sizeof(unsigned char));	
-	
+	ImageIn              = (unsigned char *) rt_alloc( RT_ALLOC_L2_CL_DATA, W*H*sizeof(unsigned char));
+	ImageIn1             = (unsigned char *) rt_alloc( RT_ALLOC_L2_CL_DATA, W*H*sizeof(unsigned char));
+
 	ImageOut             = (unsigned char *) rt_alloc( RT_ALLOC_L2_CL_DATA, (Wout*Hout)*sizeof(unsigned char));
 	ImageIntegral        = (unsigned int *)  rt_alloc( RT_ALLOC_L2_CL_DATA, (Wout*Hout)*sizeof(unsigned int));
 	SquaredImageIntegral = (unsigned int *)  rt_alloc( RT_ALLOC_L2_CL_DATA, (Wout*Hout)*sizeof(unsigned int));
 	image16              = (unsigned short *)  rt_alloc( RT_ALLOC_L2_CL_DATA, ((W/2)*(H/2))*sizeof(unsigned short));
-	
+
 	if (ImageIn==0 || ImageOut==0 || ImageIn1==0 ) {
 		printf("Failed to allocate Memory for Image (%d bytes)\n", ImgSize*sizeof(unsigned char));
 		return 1;
@@ -686,7 +688,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	#if FROM_FILE
+#if FROM_FILE
 	rt_bridge_connect(NULL);
 
 	{
@@ -700,26 +702,30 @@ int main(int argc, char *argv[])
 	}
 
 #else
-	
+#if SAVE_IMAGE
+	rt_bridge_connect(NULL);
+#endif
 
 	camera_cristal_enable();
 	cam_param_conf(&cam1_conf);
 	camera1 = rt_camera_open("camera", &cam1_conf, 0);
 	if (camera1 == NULL) return -1;
-	
+
+#if !SAVE_IMAGE
 	//Init SPI for LCD Screen
 	rt_spim_t *spim = init_spi_lcd();
 	ILI9341_begin(spim);
 	writeFillRect(spim, 0,0,240,320,ILI9341_WHITE);
 	setRotation(spim,2);
-	
+#endif
+
 	//Camera
 	rt_cam_control(camera1, CMD_INIT, 0);
 	rt_cam_control(camera1, CMD_START, 0);
 
 
 	himaxRegWrite(camera1,0x1003, 0x00);             //  Black level target
-    
+
     himaxRegWrite(camera1,AE_TARGET_MEAN, 0x8C);      //AE target mean [Def: 0x3C]
     himaxRegWrite(camera1,AE_MIN_MEAN,    0x3A);      //AE min target mean [Def: 0x0A]
     himaxRegWrite(camera1,INTEGRATION_H,  0xa8);      //Integration H [Def: 0x01]
@@ -734,12 +740,12 @@ int main(int argc, char *argv[])
 	rt_event_t *event_0 = rt_event_get_blocking(NULL);
 	//Configure the DMA in continuous mode
 	camera1->conf.cpiCfg |= 1;
-	
+
 	rt_camera_capture (camera1, ImageIn1, W*H, event_0);
-	
+
 	rt_event_wait(event_0);
 #endif
-	
+
 	ClusterCall.OutCamera            = ImageIn1;
 	ClusterCall.ImageIn              = ImageIn;
 	ClusterCall.Win                  = W;
@@ -752,42 +758,45 @@ int main(int argc, char *argv[])
 	ClusterCall.image16              = image16;
 
 #if !FROM_FILE
-
+#if !SAVE_IMAGE
 	add_gwt_logo(spim);
 	setCursor(0,200);
 	sprintf(out_perf_string,"1 Image/Sec: \n       uWatt @ 1.2V\n       uWatt @ 1.0V");
-	writeText(spim,out_perf_string,2);
+    writeText(spim,out_perf_string,2);
+#endif
 #endif
 
     //Cluster Init
 	rt_cluster_call(NULL, CID, (void (*)(void *)) cluster_init, &ClusterCall, stacks, STACK_SIZE, STACK_SIZE, rt_nb_pe(), NULL);
-	
-#if !FROM_FILE	
+
+#if !FROM_FILE && !SAVE_IMAGE
   	while(1){
 #endif
   		//Elaborating input image
 		rt_cluster_call(NULL, CID, (void (*)(void *)) cluster_main, &ClusterCall, stacks, STACK_SIZE, STACK_SIZE, rt_nb_pe(), NULL);
 
-#if !FROM_FILE	
-		//Printing cycles to screen		
+#if !FROM_FILE && !SAVE_IMAGE
+		//Printing cycles to screen
 		sprintf(out_perf_string,"%d  \n%d  ", (int)((float)(1/(50000000.f/ClusterCall.cycles)) * 28000.f),(int)((float)(1/(50000000.f/ClusterCall.cycles)) * 16800.f));
   		setCursor(0,200+2*8);
   		writeText(spim,out_perf_string,2);
   		//Pushing image to screen
+
   		lcd_pushPixels(spim, LCD_OFF_X, LCD_OFF_Y, W/2,H/2, image16);
-		
+
   	}
 #endif
 
-	#if SAVE_IMAGE
-		sprintf(imageName, "../../../%s", Imagefile);
-    	printf("imgName: %s\n", imageName);
-    	WriteImageToFile(imageName,W,H,(ImageIn));	
-	#endif
-  	
+#if SAVE_IMAGE
+    Imagefile = "ImgOut.pgm";
+    sprintf(imageName, "../../../%s", Imagefile);
+    printf("imgName: %s\n", imageName);
+    WriteImageToFile(imageName,W,H,(ImageIn));
+#endif
+
 	// Close the cluster
 	rt_cluster_mount(UNMOUNT, CID, 0, NULL);
-#if FROM_FILE	
+#if FROM_FILE || SAVE_IMAGE
 	rt_bridge_disconnect(NULL);
 #endif
 
