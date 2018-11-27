@@ -29,6 +29,7 @@
 
 #define FROM_FILE 1
 #define SAVE_IMAGE 1
+
 #define VERBOSE 1
 
 
@@ -779,7 +780,7 @@ int main(int argc, char *argv[])
   	}
 #endif
 
-	#if SAVE_IMAGE
+	#if FROM_FILE && SAVE_IMAGE
 		sprintf(imageName, "../../../%s", Imagefile);
     	printf("imgName: %s\n", imageName);
     	WriteImageToFile(imageName,W,H,(ImageIn));	
