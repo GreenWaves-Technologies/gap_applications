@@ -41,8 +41,9 @@ static void progress_bar(char * OutString, int n, int tot){
 static unsigned int SkipComment(unsigned char *Img, unsigned int Ind)
 
 {
+	static int Debug=0;
 	while (Img[Ind] == '#') {
-		while (Img[Ind] != '\n') {printf("%c", Img[Ind]);Ind++;}
+		while (Img[Ind] != '\n') {if(Debug)printf("%c", Img[Ind]);Ind++;}
 		Ind++;
 	}
 	return Ind;

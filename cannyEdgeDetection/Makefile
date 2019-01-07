@@ -27,7 +27,7 @@
 
 PULP_APP = cannyEdge
 PULP_APP_SRCS = CannyDetect.c ImgIO.c
-PULP_CFLAGS += -O3 -g
+PULP_CFLAGS += -O3 -g -DFROM_FILE
 
 #PLPBRIDGE_FLAGS += -f
 #PLPBRIDGE_FLAGS += -hyper
