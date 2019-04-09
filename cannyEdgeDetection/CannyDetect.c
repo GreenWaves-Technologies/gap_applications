@@ -36,12 +36,26 @@
 #define CID             0
 
 #define EDGE_LOW_THRESHOLD 1
-#define EDGE_HIGH_THRESHOLD 5
+#define EDGE_HIGH_THRESHOLD 10
 
 #define Max(a, b) (((a)>(b))?(a):(b))
 #define Min(a, b) (((a)<(b))?(a):(b))
 
+#ifdef FROM_FILE
+// If you want to use a local image, please specify the imgae size below:
+#define ISRGB 0
+#define LINE 240
+#define COL 320
+
+#if ( (COL%4!=0) || (LINE%4!=0))
+    #error LINE and COL of input image must be multiple of four!
+#endif
+
+
+RT_L2_DATA unsigned char *ImageIn_L2;
+#else
 #include "Mills.h"
+#endif
 unsigned char RT_L2_DATA *ImageOut_L2;
 
 /* Dma copy direction */
@@ -521,7 +535,7 @@ static void InitCannyMaster(unsigned int W)
 void MasterCannyDetector(unsigned int W, unsigned int H)
 
 {
-    static int Debug = 0;
+    static int Debug = 1;
     static int FullReport = 1;
     rt_dma_copy_t dmaCpIn, dmaCpOut;
     unsigned int First, Last, IterCount, Toggle, Time;
@@ -661,6 +675,21 @@ int main(int argc, char *argv[])
     if (rt_event_alloc(NULL, 4)) return -1;
 
     rt_bridge_connect(NULL);
+#if FROM_FILE
+	char *Imagefile = "testImg.ppm";
+	char imageName[64];
+	sprintf(imageName, "../../../%s", Imagefile);
+	ImageIn_L2 = (unsigned char *) rt_alloc( RT_ALLOC_L2_CL_DATA, COL*LINE*sizeof(unsigned char));
+
+    unsigned int Wi, Hi;
+
+    if ( (ReadImageFromFile(imageName, &Wi, &Hi, ImageIn_L2, LINE*COL*sizeof(unsigned char))==0) || (Wi!=COL) || (Hi!=LINE))
+    {
+        printf("Failed to load image %s or dimension mismatch Expects [%dx%d], Got [%dx%d]\n", imageName, COL, LINE, Wi, Hi);
+        return 1;
+    }
+
+#endif
 
     // Activate the Cluster
     rt_cluster_mount(MOUNT, CID, 0, NULL);
@@ -687,18 +716,15 @@ int main(int argc, char *argv[])
     }
 
     // Allocate the buffer for the output image.
-    ImageOut_L2 = rt_alloc(RT_ALLOC_L2_CL_DATA,(LINE*COL+PPM_HEADER));
+    ImageOut_L2 = rt_alloc(RT_ALLOC_L2_CL_DATA,(LINE*COL));
 
     // Execute the function "cluster_main" on the Core 0 of cluster.
     rt_cluster_call(NULL, CID, cluster_main, NULL, stacks, STACK_SIZE, STACK_SIZE, rt_nb_pe(), NULL);
 
-    // The FC arrives here when the Cluster finished its job.
-    rt_event_execute(NULL, 0);
-
     char imgName[50];
     sprintf(imgName, "../../../img_OUT.ppm");
     printf("imgName: %s\n", imgName);
-    WriteImageToFile(imgName, COL, LINE, (ImageOut_L2 + PPM_HEADER));
+    WriteImageToFile(imgName, COL, LINE, (ImageOut_L2));
 
 
     // Close the cluster

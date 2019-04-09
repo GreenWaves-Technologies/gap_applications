@@ -41,9 +41,8 @@ static void progress_bar(char * OutString, int n, int tot){
 static unsigned int SkipComment(unsigned char *Img, unsigned int Ind)
 
 {
-	static int Debug=0;
 	while (Img[Ind] == '#') {
-		while (Img[Ind] != '\n') {if(Debug)printf("%c", Img[Ind]);Ind++;}
+		while (Img[Ind] != '\n') {printf("%c", Img[Ind]);Ind++;}
 		Ind++;
 	}
 	return Ind;
@@ -152,7 +151,7 @@ unsigned char *ReadImageFromFile(char *ImageName, unsigned int *W, unsigned int 
 	if (ImagePtr == 0) {
 		printf("Failed to allocate %d bytes for input image\n", AlignedSize); goto Fail;
 	}
-	rt_bridge_read(File, NULL,HeaderSize,NULL);
+	rt_bridge_read(File, NULL, HeaderSize,NULL);
 	{
 		unsigned char *TargetImg = ImagePtr;
 		unsigned int RemainSize = AlignedSize;

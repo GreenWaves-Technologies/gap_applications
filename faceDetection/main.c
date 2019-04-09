@@ -29,6 +29,7 @@
 
 #define FROM_FILE 0
 #define SAVE_IMAGE 1
+
 #define VERBOSE 1
 
 
