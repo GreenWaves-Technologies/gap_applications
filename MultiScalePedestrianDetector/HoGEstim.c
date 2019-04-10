@@ -80,6 +80,7 @@ static void cam_param_conf(rt_cam_conf_t *_conf){
   _conf->frameDrop_en = DISABLE;
   _conf->frameDrop_value = 0;
   _conf->cpiCfg = UDMA_CHANNEL_CFG_SIZE_16;
+  _conf->control_id = 1;
 }
 
 static int CoreCountDynamic = 1;
@@ -468,7 +469,8 @@ int main()
 
 
 #if FROM_FILE
-	rt_bridge_connect(NULL);
+	rt_bridge_connect(1, NULL);
+    printf("Bridge connected, waiting for load image\n");
 
 	{
 

@@ -5,12 +5,16 @@
 # of the BSD license.  See the LICENSE file for details.
 
 pulpChip = GAP
-PULP_APP = Mnist
+PULP_APP = meterOCR
 TILER_PATH = $(GAP_SDK_HOME)/tools/autotiler
-TILER_GENERATOR_PATH=$(TILER_PATH)/autotiler_generator
-PULP_APP_SRCS = Mnist.c MnistKernels.c MnistKernelsInit.c $(TILER_GENERATOR_PATH)/CnnStdModel/CNN_BasicKernels.c ImgIO.c
-PULP_APP_SRCS += $(TILER_GENERATOR_PATH)/CnnStdModel/CNN_HwCE.c
+TILER_LIB = $(TILER_PATH)/lib/libtile.a
+TILER_INC = $(TILER_PATH)/include
+TILER_GENERATOR_PATH = $(TILER_PATH)/generators
+MNIST_GEN_PATH = $(TILER_GENERATOR_PATH)/CNN/generator
+MNIST_KER_PATH = $(TILER_GENERATOR_PATH)/CNN/kernels
 
+PULP_APP_SRCS = Mnist.c MnistKernels.c MnistKernelsInit.c $(MNIST_KER_PATH)/src/CNN_BiasReLULinear_BasicKernels.c $(MNIST_KER_PATH)/src/CNN_Conv_BasicKernels.c $(MNIST_KER_PATH)/src/CNN_Pooling_BasicKernels.c ImgIO.c
+PULP_APP_SRCS += $(MNIST_KER_PATH)/src/CNN_HwCE.c
 pulpFc=1
 RM=rm -f
 
@@ -24,21 +28,22 @@ PULP_LDFLAGS +=  -flto -Wl,--gc-sections
 # The generated code outputs a maybe-uninitialized error which is rather difficult to suppress
 # in a clean way.
 PULP_CFLAGS += -Wall -Wno-maybe-uninitialized -Wno-unused-but-set-variable
-PULP_CFLAGS += -I$(TILER_PATH)/StdTypes -I$(TILER_GENERATOR_PATH)/CnnStdModel
+PULP_CFLAGS += -I$(TILER_INC) -I$(MNIST_KER_PATH)/include
 
+PLPBRIDGE_FLAGS += -fileIO 5
 # The double colon allows us to force this to occur before the imported all target
 # Link model generation to all step
 all:: model
 
 # Build the code generator
-GenTile:
-	gcc -o GenMnist $(USE_HARDWARE_CE) -I$(TILER_PATH)/GenTiling -I$(TILER_PATH)/StdTypes/ -I$(TILER_GENERATOR_PATH)/CnnStdModel MnistGenerator.c $(TILER_GENERATOR_PATH)/CnnStdModel/CNN_Generator.c $(TILER_PATH)/GenTiling/LibTile.a
+GenTileBuild:
+	gcc -o GenMnist $(USE_HARDWARE_CE) -I$(TILER_INC) -I$(MNIST_GEN_PATH)/include MnistModel.c $(MNIST_GEN_PATH)/src/CNN_Generators.c $(TILER_LIB)
 
 # Run the code generator
-MnistKernels.c MnistKernelsInit.c: GenTile
+GenTile: GenTileBuild
 	./GenMnist
 
-model: MnistKernels.c MnistKernelsInit.c
+model: GenTile
 
 clean::
 	$(RM) GenMnist MnistKernels.* MnistKernelsInit.*

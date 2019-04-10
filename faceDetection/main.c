@@ -27,7 +27,7 @@
 #define UNMOUNT         0
 #define CID             0
 
-#define FROM_FILE 0
+#define FROM_FILE 1
 #define SAVE_IMAGE 1
 
 #define VERBOSE 1
@@ -117,6 +117,7 @@ static void cam_param_conf(rt_cam_conf_t *_conf){
   _conf->frameDrop_en = DISABLE;
   _conf->frameDrop_value = 0;
   _conf->cpiCfg = UDMA_CHANNEL_CFG_SIZE_16;
+  _conf->control_id = 1;
 }
 
 static void gray8_to_RGB565_tile(unsigned char *input,unsigned short *output,int width, int height,int x, int y,int img_width){
@@ -692,7 +693,8 @@ int main(int argc, char *argv[])
 	}
 
 #if FROM_FILE
-	rt_bridge_connect(NULL);
+	rt_bridge_connect(1, NULL);
+    printf("Bridge connected, waiting for load image\n");
 
 	{
 
@@ -706,7 +708,7 @@ int main(int argc, char *argv[])
 
 #else
 #if SAVE_IMAGE
-	rt_bridge_connect(NULL);
+	rt_bridge_connect(1, NULL);
 #endif
 
 	camera_cristal_enable();

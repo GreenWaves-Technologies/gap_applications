@@ -672,11 +672,15 @@ int main(int argc, char *argv[])
 
 {
     printf ("Start of application\n");
-    if (rt_event_alloc(NULL, 4)) return -1;
+    if (rt_event_alloc(NULL, 8)) return -1;
 
-    rt_bridge_connect(NULL);
+    printf("bridge connecting\n");
+    rt_bridge_connect(1, NULL);
+    printf("Bridge connected, waiting for load image\n");
+
 #if FROM_FILE
-	char *Imagefile = "testImg.ppm";
+
+	char *Imagefile = "Pedestrian.pgm";
 	char imageName[64];
 	sprintf(imageName, "../../../%s", Imagefile);
 	ImageIn_L2 = (unsigned char *) rt_alloc( RT_ALLOC_L2_CL_DATA, COL*LINE*sizeof(unsigned char));

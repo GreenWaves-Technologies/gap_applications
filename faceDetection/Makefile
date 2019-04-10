@@ -31,6 +31,7 @@ PULP_CFLAGS += -Wall -Werror -Wno-maybe-uninitialized -Wno-unused-but-set-variab
 #PLPBRIDGE_FLAGS+= -f -hyper
 
 
+PLPBRIDGE_FLAGS+= -fileIO
 # The double colon allows us to force this to occur before the imported all target
 # Link model generation to all step
 all:: model

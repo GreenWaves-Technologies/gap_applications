@@ -27,6 +27,7 @@ PULP_CFLAGS += -mno-memcpy -fno-tree-loop-distribute-patterns -fdata-sections -f
 PULP_CFLAGS += -I$(TILER_INC) -I$(TILER_GENERATOR_PATH)/Resize/kernels/include -I$(TILER_GENERATOR_PATH)/HoG/kernels/include
 PULP_LDFLAGS +=  -flto -Wl,--gc-sections
 
+PLPBRIDGE_FLAGS += -fileIO 5
 imgOut:
 	mkdir $@
 

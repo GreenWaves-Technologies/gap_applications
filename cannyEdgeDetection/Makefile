@@ -31,6 +31,7 @@ PULP_CFLAGS += -O3 -g -DFROM_FILE
 
 #PLPBRIDGE_FLAGS += -f
 #PLPBRIDGE_FLAGS += -hyper
+PLPBRIDGE_FLAGS += -fileIO
 
 clean::
 	rm -rf img_OUT.ppm
